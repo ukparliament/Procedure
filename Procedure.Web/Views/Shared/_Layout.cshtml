@@ -1,0 +1,34 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Procedure Schema</title>
+    <link rel="stylesheet" href="~/Content/site.css">
+    <link rel="stylesheet" href="~/Content/main.css">
+
+</head>
+<body>
+    <header>
+        <div class="container hero">
+            <h1>Procedure Schema</h1>
+        </div>
+    </header>
+    <nav class="navigation--main">
+        <div class="container">
+            <ul>
+                <li>@Html.ActionLink("Procedures", "Index", "Procedure")</li>
+            </ul>
+        </div>
+    </nav>
+    <main>
+        @RenderBody()
+    </main>
+    <footer>
+        <div class="container">
+            <h2 class="logo">UK Parliament</h2>
+        </div>
+    </footer>
+    @RenderSection("scripts", required: false)
+</body>
+</html>

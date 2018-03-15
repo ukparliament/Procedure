@@ -1,0 +1,37 @@
+﻿@using Procedure.Web.Models
+@using System.Linq
+@model List<ProcedureItem>
+
+<section>
+    <div class="container">
+        @if (Model.Any())
+        {
+            <h2>Procedures</h2>
+        }
+        else
+        {
+            <h2>No procedures</h2>
+        }
+    </div>
+</section>
+
+<section>
+    <div class="container">
+        <ul class="list--block">
+            @foreach (ProcedureItem procedure in Model.OrderBy(p => p.Id))
+            {
+                <li>
+                    <div class="list--details">
+                        <h2>@procedure.Title</h2>
+                        <p>Id @procedure.Id</p>
+                    </div>
+                    @Html.ActionLink("Details", "Details", "Procedure", new { id = procedure.Id }, new { @class = "btn--secondary" })
+                </li>
+            }
+        </ul>
+    </div>
+</section>
+
+@section scripts{
+
+}

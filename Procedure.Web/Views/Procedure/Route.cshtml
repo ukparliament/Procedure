@@ -1,0 +1,19 @@
+﻿@using Procedure.Web.Models
+@using System.Linq
+@model RouteViewModel
+
+@{
+    IEnumerable<ProcedureRouteItem> root = Model.Routes
+        .Where(r => r.FromStepId==Model.FromStepId)
+        .Distinct();
+    foreach (ProcedureRouteItem route in root)
+    {
+        <details>
+            <summary>@route.ToStepText</summary>
+            @{
+                RouteViewModel nestedRoute = new RouteViewModel() { Routes = Model.Routes, FromStepId = route.ToStepId };
+                Html.RenderPartial("Route", nestedRoute);
+            }    
+        </details>
+    }
+}

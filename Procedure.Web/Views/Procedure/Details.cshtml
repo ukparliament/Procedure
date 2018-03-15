@@ -1,0 +1,24 @@
+﻿@using Procedure.Web.Models
+@using System.Linq
+@model List<ProcedureRouteItem>
+
+<section>
+    <div class="container">
+        @{
+            IEnumerable<KeyValuePair<int, string>> root = Model
+                .Where(r => Model.Any(to => to.ToStepId == r.FromStepId) == false)
+                .Select(r => new KeyValuePair<int, string>(r.FromStepId, r.FromStepText))
+                .Distinct();
+            foreach (KeyValuePair<int, string> route in root)
+            {
+    <details>
+        <summary>@route.Value</summary>
+                @{
+                    RouteViewModel nestedRoute = new RouteViewModel() { Routes = Model, FromStepId = route.Key };
+                    Html.RenderPartial("Route", nestedRoute);
+                }
+    </details>
+            }
+    }
+</div>
+</section>
