@@ -137,6 +137,7 @@
   <ItemGroup>
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\ProcedureController.cs" />
+    <Compile Include="Controllers\WorkPackageController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -144,6 +145,8 @@
     <Compile Include="Models\ProcedureItem.cs" />
     <Compile Include="Models\ProcedureRouteItem.cs" />
     <Compile Include="Models\RouteViewModel.cs" />
+    <Compile Include="Models\WorkPackage.cs" />
+    <Compile Include="Models\WorkPackageProcedureItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -170,6 +173,8 @@
     <Content Include="Secrets.config" />
     <Content Include="Views\Procedure\Details.cshtml" />
     <Content Include="Views\Procedure\Route.cshtml" />
+    <Content Include="Views\WorkPackage\Index.cshtml" />
+    <Content Include="Views\WorkPackage\Details.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

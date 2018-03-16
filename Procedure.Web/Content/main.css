@@ -1,3 +1,28 @@
 ﻿details {
     margin-left: 15px;
 }
+
+
+@supports (-ms-ime-align:auto) {
+    details {
+        list-style: none;
+    }
+
+    summary::-webkit-details-marker {
+        display: none
+    }
+
+    summary:after {
+        content: "►";
+        float: left;
+        font-size: 16px;
+        font-weight: bold;
+        margin: 0px 5px 0 0;
+        padding: 0;
+        text-align: center;
+    }
+
+    details[open] summary:after {
+        content: "▼";
+    }
+}

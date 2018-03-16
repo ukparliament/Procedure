@@ -11,6 +11,8 @@ namespace Procedure.Web.Controllers
         internal string ProcedureStepListId = ConfigurationManager.AppSettings["ProcedureStepListId"];
         internal string ProcedureRouteTypeListId = ConfigurationManager.AppSettings["ProcedureRouteTypeListId"];
         internal string ProcedureRouteListId = ConfigurationManager.AppSettings["ProcedureRouteListId"];
+        internal string WorkPackageListId = ConfigurationManager.AppSettings["WorkPackageListId"];
+        internal string WorkPackageProcedureListId = ConfigurationManager.AppSettings["WorkPackageProcedureListId"];
 
         private string listUri = ConfigurationManager.AppSettings["GetListUri"];
         private string itemUri = ConfigurationManager.AppSettings["GetItemUri"];
