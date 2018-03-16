@@ -25,7 +25,9 @@
                         <h2>@procedure.Title</h2>
                         <p>Id @procedure.Id</p>
                     </div>
-                    @Html.ActionLink("Details", "Details", "Procedure", new { id = procedure.Id }, new { @class = "btn--secondary" })
+                    <div>
+                        @Html.ActionLink("Details", "Details", "Procedure", new { id = procedure.Id }, new { @class = "btn--secondary" })
+                    </div>
                 </li>
             }
         </ul>
