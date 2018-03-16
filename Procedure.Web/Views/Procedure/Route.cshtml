@@ -8,12 +8,25 @@
         .Distinct();
     foreach (ProcedureRouteItem route in root)
     {
+        string triggerClass= string.Empty;
+        switch (route.RouteTypeId)
+        {
+            case 1:
+                triggerClass = "theme--grey-4";
+                break;
+            case 2:
+                triggerClass = "theme--white";
+                break;
+            case 3:
+                triggerClass = "theme--caution";
+                break;
+        }
         <details>
-            <summary>@route.ToStepText</summary>
+            <summary><span class="hint @triggerClass">@route.RouteTypeText</span> @route.ToStepText</summary>
             @{
-                RouteViewModel nestedRoute = new RouteViewModel() { Routes = Model.Routes, FromStepId = route.ToStepId };
-                Html.RenderPartial("Route", nestedRoute);
-            }    
+                    RouteViewModel nestedRoute = new RouteViewModel() { Routes = Model.Routes, FromStepId = route.ToStepId };
+                    Html.RenderPartial("Route", nestedRoute);
+                }    
         </details>
     }
-}
+        }
