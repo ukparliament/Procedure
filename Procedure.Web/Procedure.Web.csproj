@@ -142,8 +142,11 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\ListRequestObject.cs" />
+    <Compile Include="Models\ProcedureDetailViewModel.cs" />
     <Compile Include="Models\ProcedureItem.cs" />
     <Compile Include="Models\ProcedureRouteItem.cs" />
+    <Compile Include="Models\ReferenceTable.cs" />
+    <Compile Include="Models\RouteStepViewModel.cs" />
     <Compile Include="Models\RouteViewModel.cs" />
     <Compile Include="Models\WorkPackage.cs" />
     <Compile Include="Models\WorkPackageProcedureItem.cs" />
@@ -175,6 +178,7 @@
     <Content Include="Views\Procedure\Route.cshtml" />
     <Content Include="Views\WorkPackage\Index.cshtml" />
     <Content Include="Views\WorkPackage\Details.cshtml" />
+    <Content Include="Views\Procedure\RouteStep.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

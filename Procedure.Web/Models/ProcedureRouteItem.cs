@@ -1,13 +1,72 @@
-﻿namespace Procedure.Web.Models
+﻿using Newtonsoft.Json;
+
+namespace Procedure.Web.Models
 {
     public class ProcedureRouteItem
     {
+        [JsonProperty(PropertyName = "ID")]
         public int Id { get; set; }
-        public int FromStepId { get; set; }
-        public string FromStepText { get; set; }
-        public int ToStepId { get; set; }
-        public string ToStepText { get; set; }
-        public int RouteTypeId { get; set; }
-        public string RouteTypeText { get; set; }
+
+        [JsonIgnore]
+        public int? FromStepId
+        {
+            get
+            {
+                return FromStep?.Id;
+            }
+        }
+
+        [JsonIgnore]
+        public string FromStepText
+        {
+            get
+            {
+                return FromStep?.Value;
+            }
+        }
+
+        [JsonIgnore]
+        public int? ToStepId
+        {
+            get
+            {
+                return ToStep?.Id;
+            }
+        }
+
+        [JsonIgnore]
+        public string ToStepText
+        {
+            get
+            {
+                return ToStep?.Value;
+            }
+        }
+
+        [JsonIgnore]
+        public int? RouteTypeId
+        {
+            get
+            {
+                return RouteType?.Id;
+            }
+        }
+
+        [JsonIgnore]
+        public string RouteTypeText
+        {
+            get
+            {
+                return RouteType?.Value;
+            }
+        }
+
+        public ReferenceTable FromStep { get; set; }
+
+        public ReferenceTable RouteType { get; set; }
+
+        public ReferenceTable ToStep { get; set; }
+
     }
+
 }

@@ -1,0 +1,20 @@
+﻿@using Procedure.Web.Models
+@model RouteStepViewModel
+
+@{
+    string triggerClass = string.Empty;
+    switch (Model.RouteTypeId)
+    {
+        case 1:
+            triggerClass = "theme--grey-4";
+            break;
+        case 2:
+            triggerClass = "theme--white";
+            break;
+        case 3:
+            triggerClass = "theme--caution";
+            break;
+    }
+}
+<span><span class="hint @triggerClass">@Model.RouteTypeText</span> @Model.StepText</span>
+

@@ -1,8 +1,8 @@
 ﻿namespace Procedure.Web.Models
 {
-    public class ProcedureItem
+    public class ReferenceTable
     {
         public int Id { get; set; }
-        public string Title { get; set; }
+        public string Value { get; set; }
     }
 }

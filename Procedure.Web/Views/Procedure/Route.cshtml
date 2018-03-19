@@ -1,32 +1,34 @@
 ﻿@using Procedure.Web.Models
-@using System.Linq
 @model RouteViewModel
 
 @{
-    IEnumerable<ProcedureRouteItem> root = Model.Routes
-        .Where(r => r.FromStepId==Model.FromStepId)
-        .Distinct();
-    foreach (ProcedureRouteItem route in root)
+    foreach (ProcedureRouteItem route in Model.Children)
     {
-        string triggerClass= string.Empty;
-        switch (route.RouteTypeId)
+        IEnumerable<ProcedureRouteItem> children = Model.Routes
+            .Where(r => r.FromStepId == route.ToStepId)
+            .Distinct();
+        RouteStepViewModel routeStep = new RouteStepViewModel() { RouteTypeId = route.RouteTypeId.Value, RouteTypeText = route.RouteTypeText, StepText = route.ToStepText };
+        if (children.Any())
         {
-            case 1:
-                triggerClass = "theme--grey-4";
-                break;
-            case 2:
-                triggerClass = "theme--white";
-                break;
-            case 3:
-                triggerClass = "theme--caution";
-                break;
-        }
-        <details>
-            <summary><span class="hint @triggerClass">@route.RouteTypeText</span> @route.ToStepText</summary>
-            @{
-                    RouteViewModel nestedRoute = new RouteViewModel() { Routes = Model.Routes, FromStepId = route.ToStepId };
+            <details>
+                <summary>
+                    @{
+                        Html.RenderPartial("RouteStep", routeStep);
+                    }
+                </summary>
+                @{
+                    RouteViewModel nestedRoute = new RouteViewModel() { Routes = Model.Routes, Children = children.ToList() };
                     Html.RenderPartial("Route", nestedRoute);
-                }    
-        </details>
-    }
+                }
+            </details>
         }
+        else
+        {
+            <div>
+                @{
+                    Html.RenderPartial("RouteStep", routeStep);
+                }
+            </div>
+        }
+    }
+}

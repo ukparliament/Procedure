@@ -12,41 +12,38 @@ namespace Procedure.Web.Controllers
         public ActionResult Index()
         {
             List<ProcedureItem> procedures = new List<ProcedureItem>();
-            HttpResponseMessage responseMessage = GetList(ProcedureListId);
-            string response = responseMessage.Content.ReadAsStringAsync().Result;
-            JObject jsonResponse = (JObject)JsonConvert.DeserializeObject(response);
-            foreach (JObject item in (JArray)jsonResponse.SelectToken("value"))
+            string response = null;
+            using (HttpResponseMessage responseMessage = GetList(ProcedureListId))
             {
-                procedures.Add(new ProcedureItem()
-                {
-                    Id = item["ID"].ToObject<int>(),
-                    Title = item["Title"].ToString()
-                });
+                response = responseMessage.Content.ReadAsStringAsync().Result;
             }
-
+            JObject jsonResponse = (JObject)JsonConvert.DeserializeObject(response);
+            procedures = ((JArray)jsonResponse.SelectToken("value")).ToObject<List<ProcedureItem>>();
+            
             return View(procedures);
         }
 
         public ActionResult Details(int id)
         {
-            List<ProcedureRouteItem> routes = new List<ProcedureRouteItem>();
-            HttpResponseMessage responseMessage = GetList(ProcedureRouteListId, filter: $"Procedure/ID eq {id}");
-            string response = responseMessage.Content.ReadAsStringAsync().Result;
-            JObject jsonResponse = (JObject)JsonConvert.DeserializeObject(response);
-            foreach (JObject item in (JArray)jsonResponse.SelectToken("value"))
+            ProcedureDetailViewModel viewModel = new ProcedureDetailViewModel();
+
+            string procedureResponse = null;
+            using (HttpResponseMessage responseMessage = GetItem(ProcedureListId, id))
             {
-                routes.Add(new ProcedureRouteItem()
-                {
-                    Id = item["ID"].ToObject<int>(),
-                    FromStepId = item["FromStep"]["Id"].ToObject<int>(),
-                    FromStepText = item["FromStep"]["Value"].ToString(),
-                    RouteTypeId = item["RouteType"]["Id"].ToObject<int>(),
-                    RouteTypeText = item["RouteType"]["Value"].ToString(),
-                    ToStepId = item["ToStep"]["Id"].ToObject<int>(),
-                    ToStepText = item["ToStep"]["Value"].ToString()
-                });
+                procedureResponse = responseMessage.Content.ReadAsStringAsync().Result;
             }
-            return View(routes);
+            ProcedureItem procedure = ((JObject)JsonConvert.DeserializeObject(procedureResponse)).ToObject<ProcedureItem>();
+            viewModel.ProcedureName = procedure.Title;
+
+            string routeResponse = null;
+            using (HttpResponseMessage responseMessage = GetList(ProcedureRouteListId, filter: $"Procedure/ID eq {id}"))
+            {
+                routeResponse = responseMessage.Content.ReadAsStringAsync().Result;
+            }
+            JObject jsonRoute = (JObject)JsonConvert.DeserializeObject(routeResponse);
+            viewModel.Routes=((JArray)jsonRoute.SelectToken("value")).ToObject<List<ProcedureRouteItem>>();
+            
+            return View(viewModel);
         }
 
     }

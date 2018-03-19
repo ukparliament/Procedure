@@ -2,9 +2,9 @@
 
 namespace Procedure.Web.Models
 {
-    public class RouteViewModel
+    public class ProcedureDetailViewModel
     {
+        public string ProcedureName { get; set; }
         public List<ProcedureRouteItem> Routes { get; set; }
-        public List<ProcedureRouteItem> Children { get; set; }
     }
 }
