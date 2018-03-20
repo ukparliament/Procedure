@@ -11,16 +11,7 @@ namespace Procedure.Web.Controllers
     {
         public ActionResult Index()
         {
-            List<ProcedureItem> procedures = new List<ProcedureItem>();
-            string response = null;
-            using (HttpResponseMessage responseMessage = GetList(ProcedureListId))
-            {
-                response = responseMessage.Content.ReadAsStringAsync().Result;
-            }
-            JObject jsonResponse = (JObject)JsonConvert.DeserializeObject(response);
-            procedures = ((JArray)jsonResponse.SelectToken("value")).ToObject<List<ProcedureItem>>();
-            
-            return View(procedures);
+            return ShowList<ProcedureItem>(ProcedureListId);
         }
 
         public ActionResult Details(int id)

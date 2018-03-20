@@ -5,9 +5,9 @@
     foreach (ProcedureRouteItem route in Model.Children)
     {
         IEnumerable<ProcedureRouteItem> children = Model.Routes
-            .Where(r => r.FromStepId == route.ToStepId)
+            .Where(r => r.FromStep.Id == route.ToStep.Id)
             .Distinct();
-        RouteStepViewModel routeStep = new RouteStepViewModel() { RouteTypeId = route.RouteTypeId.Value, RouteTypeText = route.RouteTypeText, StepText = route.ToStepText };
+        RouteStepViewModel routeStep = new RouteStepViewModel() { RouteTypeId = route.RouteType.Id, RouteTypeText = route.RouteType.Value, StepText = route.ToStep.Value };
         if (children.Any())
         {
             <details>

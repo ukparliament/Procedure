@@ -141,6 +141,8 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\BaseSharepointTable.cs" />
+    <Compile Include="Models\BusinessItem.cs" />
     <Compile Include="Models\ListRequestObject.cs" />
     <Compile Include="Models\ProcedureDetailViewModel.cs" />
     <Compile Include="Models\ProcedureItem.cs" />
@@ -148,8 +150,8 @@
     <Compile Include="Models\ReferenceTable.cs" />
     <Compile Include="Models\RouteStepViewModel.cs" />
     <Compile Include="Models\RouteViewModel.cs" />
-    <Compile Include="Models\WorkPackage.cs" />
-    <Compile Include="Models\WorkPackageProcedureItem.cs" />
+    <Compile Include="Models\WorkPackageDetailViewModel.cs" />
+    <Compile Include="Models\WorkPackageItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,22 +1,20 @@
 ﻿@using Procedure.Web.Models
 @using System.Linq
-@model List<WorkPackageProcedureItem>
+@model WorkPackageDetailViewModel
 
 <section>
     <div class="container">
-        <div class="container">
-            <ul class="list--block">
-                @foreach (WorkPackageProcedureItem procedure in Model.OrderBy(p => p.Id))
-                {
-                    <li>
-                        <div class="list--details">
-                            <h2>@procedure.Id</h2>
-                            <p>This work Package, #@procedure.WorkPackageId, was subject to procedure #@procedure.SubjectToProcedureId, which consists of routes and steps...</p>
-                        </div>
-                    </li>
-                }
-
-            </ul>
-        </div>
+        <h2>@Model.WorkPackageName</h2>
+        <ul class="list--block">
+            @foreach (BusinessItem businessItem in Model.BusinessItems.OrderBy(p => p.Title))
+            {
+                <li>
+                    <div class="list--details">
+                        <h2>@businessItem.Title</h2>
+                        <p>Actualises @businessItem.Actualises.Value</p>
+                    </div>
+                </li>
+            }
+        </ul>
     </div>
 </section>

@@ -1,4 +1,7 @@
-﻿using Procedure.Web.Models;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Procedure.Web.Models;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Net.Http;
 using System.Web.Mvc;
@@ -11,8 +14,8 @@ namespace Procedure.Web.Controllers
         internal string ProcedureStepListId = ConfigurationManager.AppSettings["ProcedureStepListId"];
         internal string ProcedureRouteTypeListId = ConfigurationManager.AppSettings["ProcedureRouteTypeListId"];
         internal string ProcedureRouteListId = ConfigurationManager.AppSettings["ProcedureRouteListId"];
-        internal string WorkPackageListId = ConfigurationManager.AppSettings["WorkPackageListId"];
-        internal string WorkPackageProcedureListId = ConfigurationManager.AppSettings["WorkPackageProcedureListId"];
+        internal string ProcedureWorkPackageListId = ConfigurationManager.AppSettings["ProcedureWorkPackageListId"];
+        internal string ProcedureBusinessItemListId = ConfigurationManager.AppSettings["ProcedureBusinessItemListId"];
 
         private string listUri = ConfigurationManager.AppSettings["GetListUri"];
         private string itemUri = ConfigurationManager.AppSettings["GetItemUri"];
@@ -36,6 +39,20 @@ namespace Procedure.Web.Controllers
             HttpClient client = new HttpClient();
 
             return client.GetAsync(uri).Result;
+        }
+
+        internal ActionResult ShowList<T>(string listId)
+        {
+            List<T> items = new List<T>();
+            string response = null;
+            using (HttpResponseMessage responseMessage = GetList(listId))
+            {
+                response = responseMessage.Content.ReadAsStringAsync().Result;
+            }
+            JObject jsonResponse = (JObject)JsonConvert.DeserializeObject(response);
+            items = ((JArray)jsonResponse.SelectToken("value")).ToObject<List<T>>();
+
+            return View(items);
         }
     }
 }
