@@ -144,12 +144,14 @@
     <Compile Include="Models\BaseSharepointTable.cs" />
     <Compile Include="Models\BusinessItem.cs" />
     <Compile Include="Models\ListRequestObject.cs" />
+    <Compile Include="Models\PathwayRouteViewModel.cs" />
     <Compile Include="Models\ProcedureDetailViewModel.cs" />
     <Compile Include="Models\ProcedureItem.cs" />
     <Compile Include="Models\ProcedureRouteItem.cs" />
     <Compile Include="Models\ReferenceTable.cs" />
     <Compile Include="Models\RouteStepViewModel.cs" />
     <Compile Include="Models\RouteViewModel.cs" />
+    <Compile Include="Models\WorkPackagePathwayViewModel.cs" />
     <Compile Include="Models\WorkPackageDetailViewModel.cs" />
     <Compile Include="Models\WorkPackageItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -180,7 +182,9 @@
     <Content Include="Views\Procedure\Route.cshtml" />
     <Content Include="Views\WorkPackage\Index.cshtml" />
     <Content Include="Views\WorkPackage\Details.cshtml" />
-    <Content Include="Views\Procedure\RouteStep.cshtml" />
+    <Content Include="Views\Shared\RouteStep.cshtml" />
+    <Content Include="Views\WorkPackage\Pathway.cshtml" />
+    <Content Include="Views\WorkPackage\PathwayRoute.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

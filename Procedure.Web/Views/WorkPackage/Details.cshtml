@@ -4,9 +4,21 @@
 
 <section>
     <div class="container">
-        <h2>@Model.WorkPackageName</h2>
+        <div class="block--border">
+            <h2>@Model.WorkPackage.Title</h2>
+            <dl class="list--definition">
+                <dt>Subject to </dt>
+                <dd>@Html.ActionLink(Model.WorkPackage.SubjectTo.Value, "Details", "Procedure", new { id = Model.WorkPackage.SubjectTo.Id }, new { })</dd>
+            </dl>
+            @Html.ActionLink("Show pathway", "Pathway", "WorkPackage", new { id = Model.WorkPackage.Id }, new { @class= "btn--primary" })
+        </div>
+    </div>
+</section>
+
+<section>
+    <div class="container">
         <ul class="list--block">
-            @foreach (BusinessItem businessItem in Model.BusinessItems.OrderBy(p => p.Title))
+            @foreach (BusinessItem businessItem in Model.BusinessItems.OrderBy(p => p.Id))
             {
                 <li>
                     <div class="list--details">

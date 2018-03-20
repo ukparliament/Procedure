@@ -1,4 +1,4 @@
-﻿details {
+﻿details, .details {
     margin-left: 15px;
 }
 
@@ -25,4 +25,8 @@
     details[open] summary:after {
         content: "▼";
     }
+}
+
+.center-text {
+    text-align: center;
 }

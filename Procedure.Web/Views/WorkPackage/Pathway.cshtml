@@ -1,0 +1,62 @@
+﻿@using Procedure.Web.Models
+@using System.Linq
+@model WorkPackagePathwayViewModel
+
+<section>
+    <div class="container">
+        <div class="block--border">
+            <h2>@Model.WorkPackage.Title</h2>
+            <dl class="list--definition">
+                <dt>Subject to </dt>
+                <dd>@Html.ActionLink(Model.WorkPackage.SubjectTo.Value, "Details", "Procedure", new { id = Model.WorkPackage.SubjectTo.Id }, new { })</dd>
+            </dl>
+            @Html.ActionLink("Show details", "Details", "WorkPackage", new { id = Model.WorkPackage.Id }, new { @class = "btn--primary" })
+        </div>
+    </div>
+</section>
+@{
+    int[] stepsDone = Model.BusinessItems.Select(bi => bi.Actualises.Id).ToArray();
+    int[] startingSteps = Model.Routes
+        .Where(r => Model.Routes.Any(to => to.ToStep.Id == r.FromStep.Id) == false)
+        .Select(r => r.FromStep.Id)
+        .Distinct()
+        .ToArray();
+    int[] beginSteps = startingSteps.Intersect(stepsDone).ToArray();
+}
+<section>
+    <div class="container">
+        <ul class="list--block">
+            @foreach (int stepId in beginSteps)
+            {
+                BusinessItem businessItem = Model.BusinessItems.FirstOrDefault(b => b.Actualises.Id == stepId);
+                <li>
+                    <div class="list--details">
+                        <div class="block--border__bottom">
+                            <h2>@businessItem.Actualises.Value</h2>
+                            <p>Is actualised by @businessItem.Title</p>
+                        </div>
+                        <div class="center-text">&dArr;</div>
+                        @{
+                            ProcedureRouteItem nextCompletedStep = Model.Routes
+                                    .Where(r => r.FromStep.Id == businessItem.Actualises.Id && stepsDone.Contains(r.ToStep.Id))
+                                    .SingleOrDefault();
+                            while (nextCompletedStep != null)
+                            {
+                                businessItem = Model.BusinessItems.FirstOrDefault(b => b.Actualises.Id == nextCompletedStep.ToStep.Id);
+                                <div class="block--border__bottom">
+                                    <h2>@businessItem.Actualises.Value</h2>
+                                    <p>Is actualised by @businessItem.Title</p>
+                                </div>
+                                <div class="center-text">&dArr;</div>
+                                nextCompletedStep = Model.Routes
+                                    .Where(r => r.FromStep.Id == businessItem.Actualises.Id && stepsDone.Contains(r.ToStep.Id))
+                                    .SingleOrDefault();
+                            }
+                            Html.RenderPartial("PathwayRoute", new PathwayRouteViewModel() { FromStepId = businessItem.Actualises.Id, Routes = Model.Routes });
+                        }
+                    </div>
+                </li>
+            }
+        </ul>
+    </div>
+</section>

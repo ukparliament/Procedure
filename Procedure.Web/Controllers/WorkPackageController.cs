@@ -26,16 +26,45 @@ namespace Procedure.Web.Controllers
             {
                 workPackageResponse = responseMessage.Content.ReadAsStringAsync().Result;
             }
-            WorkPackageItem workPackage = ((JObject)JsonConvert.DeserializeObject(workPackageResponse)).ToObject<WorkPackageItem>();
-            viewModel.WorkPackageName = workPackage.Title;
+            viewModel.WorkPackage = ((JObject)JsonConvert.DeserializeObject(workPackageResponse)).ToObject<WorkPackageItem>();
 
             string businessItemResponse = null;
             using (HttpResponseMessage responseMessage = GetList(ProcedureBusinessItemListId, filter: $"BelongsTo/ID eq {id}"))
             {
                 businessItemResponse = responseMessage.Content.ReadAsStringAsync().Result;
             }
-            JObject jsonRoute = (JObject)JsonConvert.DeserializeObject(businessItemResponse);
-            viewModel.BusinessItems= ((JArray)jsonRoute.SelectToken("value")).ToObject<List<BusinessItem>>();
+            JObject jsonBusinessItem = (JObject)JsonConvert.DeserializeObject(businessItemResponse);
+            viewModel.BusinessItems= ((JArray)jsonBusinessItem.SelectToken("value")).ToObject<List<BusinessItem>>();
+
+            return View(viewModel);
+        }
+
+        public ActionResult Pathway(int id)
+        {
+            WorkPackagePathwayViewModel viewModel = new WorkPackagePathwayViewModel();
+
+            string workPackageResponse = null;
+            using (HttpResponseMessage responseMessage = GetItem(ProcedureWorkPackageListId, id))
+            {
+                workPackageResponse = responseMessage.Content.ReadAsStringAsync().Result;
+            }
+            viewModel.WorkPackage = ((JObject)JsonConvert.DeserializeObject(workPackageResponse)).ToObject<WorkPackageItem>();
+
+            string businessItemResponse = null;
+            using (HttpResponseMessage responseMessage = GetList(ProcedureBusinessItemListId, filter: $"BelongsTo/ID eq {id}"))
+            {
+                businessItemResponse = responseMessage.Content.ReadAsStringAsync().Result;
+            }
+            JObject jsonBusinessItem = (JObject)JsonConvert.DeserializeObject(businessItemResponse);
+            viewModel.BusinessItems = ((JArray)jsonBusinessItem.SelectToken("value")).ToObject<List<BusinessItem>>();
+
+            string routeResponse = null;
+            using (HttpResponseMessage responseMessage = GetList(ProcedureRouteListId, filter: $"Procedure/ID eq {viewModel.WorkPackage.SubjectTo.Id}"))
+            {
+                routeResponse = responseMessage.Content.ReadAsStringAsync().Result;
+            }
+            JObject jsonRoute = (JObject)JsonConvert.DeserializeObject(routeResponse);
+            viewModel.Routes = ((JArray)jsonRoute.SelectToken("value")).ToObject<List<ProcedureRouteItem>>();
 
             return View(viewModel);
         }
