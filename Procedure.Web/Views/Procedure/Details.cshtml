@@ -18,7 +18,7 @@
                 if (children.Any())
                 {
                     <details>
-                        <summary>@route.Value</summary>
+                        <summary>@Html.ActionLink(route.Value, "Details", "Step", new { id = route.Key }, new { })</summary>
                         @{
                             RouteViewModel nestedRoute = new RouteViewModel() { Routes = Model.Routes, Children = children.ToList() };
                             Html.RenderPartial("Route", nestedRoute);

@@ -10,7 +10,7 @@
                 <dt>Subject to </dt>
                 <dd>@Html.ActionLink(Model.WorkPackage.SubjectTo.Value, "Details", "Procedure", new { id = Model.WorkPackage.SubjectTo.Id }, new { })</dd>
             </dl>
-            @Html.ActionLink("Show pathway", "Pathway", "WorkPackage", new { id = Model.WorkPackage.Id }, new { @class= "btn--primary" })
+            @Html.ActionLink("Show pathway", "Pathway", "WorkPackage", new { id = Model.WorkPackage.Id }, new { @class = "btn--primary" })
         </div>
     </div>
 </section>
@@ -23,7 +23,15 @@
                 <li>
                     <div class="list--details">
                         <h2>@businessItem.Title</h2>
-                        <p>Actualises @businessItem.Actualises.Value</p>
+                        <p>
+                            Actualises
+                            <ul class="list--details">
+                                @foreach (ReferenceTable step in businessItem.Actualises)
+                                {
+                                    <li>@Html.ActionLink(step.Value, "Details", "Step", new { id = step.Id }, new { })</li>
+                                }
+                            </ul>
+                        </p>
                     </div>
                 </li>
             }

@@ -1,0 +1,39 @@
+﻿@using Procedure.Web.Models
+@using System.Linq
+@model List<StepItem>
+
+<section>
+    <div class="container">
+        @if (Model.Any())
+        {
+            <h2>Steps</h2>
+        }
+        else
+        {
+            <h2>No steps</h2>
+        }
+    </div>
+</section>
+
+<section>
+    <div class="container">
+        <ul class="list--block">
+            @foreach (StepItem step in Model.OrderBy(p => p.Title))
+            {
+                <li>
+                    <div class="list--details">
+                        <h2>@step.Title</h2>
+                        <p>Id @step.Id</p>
+                    </div>
+                    <div>
+                        @Html.ActionLink("Details", "Details", "Step", new { id = step.Id }, new { @class = "btn--secondary" })
+                    </div>
+                </li>
+            }
+        </ul>
+    </div>
+</section>
+
+@section scripts{
+
+}

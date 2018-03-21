@@ -137,6 +137,7 @@
   <ItemGroup>
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\ProcedureController.cs" />
+    <Compile Include="Controllers\StepController.cs" />
     <Compile Include="Controllers\WorkPackageController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -151,6 +152,8 @@
     <Compile Include="Models\ReferenceTable.cs" />
     <Compile Include="Models\RouteStepViewModel.cs" />
     <Compile Include="Models\RouteViewModel.cs" />
+    <Compile Include="Models\StepDetailViewModel.cs" />
+    <Compile Include="Models\StepItem.cs" />
     <Compile Include="Models\WorkPackagePathwayViewModel.cs" />
     <Compile Include="Models\WorkPackageDetailViewModel.cs" />
     <Compile Include="Models\WorkPackageItem.cs" />
@@ -185,6 +188,8 @@
     <Content Include="Views\Shared\RouteStep.cshtml" />
     <Content Include="Views\WorkPackage\Pathway.cshtml" />
     <Content Include="Views\WorkPackage\PathwayRoute.cshtml" />
+    <Content Include="Views\Step\Index.cshtml" />
+    <Content Include="Views\Step\Details.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

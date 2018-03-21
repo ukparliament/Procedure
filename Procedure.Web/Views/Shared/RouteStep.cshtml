@@ -16,5 +16,5 @@
             break;
     }
 }
-<span><span class="hint @triggerClass">@Model.RouteTypeText</span> @Model.StepText</span>
+<span><span class="hint @triggerClass">@Model.RouteTypeText</span> @Html.ActionLink(Model.StepText, "Details", "Step", new { id = Model.StepId }, new { })</span>
 

@@ -9,7 +9,7 @@
             .Distinct();
         foreach (ProcedureRouteItem routeItem in children)
         {
-            <span>&rArr;@{Html.RenderPartial("RouteStep", new RouteStepViewModel() { RouteTypeId = routeItem.RouteType.Id, RouteTypeText = routeItem.RouteType.Value, StepText = routeItem.ToStep.Value });}</span>
+            <span>&rArr;@{Html.RenderPartial("RouteStep", new RouteStepViewModel() { RouteTypeId = routeItem.RouteType.Id, RouteTypeText = routeItem.RouteType.Value, StepText = routeItem.ToStep.Value, StepId = routeItem.ToStep.Id });}</span>
             Html.RenderPartial("PathwayRoute", new PathwayRouteViewModel() { FromStepId = routeItem.ToStep.Id, Routes = Model.Routes });
         }
     }

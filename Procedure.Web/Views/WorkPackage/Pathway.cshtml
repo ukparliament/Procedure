@@ -15,7 +15,7 @@
     </div>
 </section>
 @{
-    int[] stepsDone = Model.BusinessItems.Select(bi => bi.Actualises.Id).ToArray();
+    int[] stepsDone = Model.BusinessItems.SelectMany(bi => bi.Actualises).Select(s => s.Id).ToArray();
     int[] startingSteps = Model.Routes
         .Where(r => Model.Routes.Any(to => to.ToStep.Id == r.FromStep.Id) == false)
         .Select(r => r.FromStep.Id)
@@ -25,38 +25,38 @@
 }
 <section>
     <div class="container">
-        <ul class="list--block">
-            @foreach (int stepId in beginSteps)
-            {
-                BusinessItem businessItem = Model.BusinessItems.FirstOrDefault(b => b.Actualises.Id == stepId);
-                <li>
-                    <div class="list--details">
-                        <div class="block--border__bottom">
-                            <h2>@businessItem.Actualises.Value</h2>
-                            <p>Is actualised by @businessItem.Title</p>
-                        </div>
-                        <div class="center-text">&dArr;</div>
-                        @{
-                            ProcedureRouteItem nextCompletedStep = Model.Routes
-                                    .Where(r => r.FromStep.Id == businessItem.Actualises.Id && stepsDone.Contains(r.ToStep.Id))
-                                    .SingleOrDefault();
-                            while (nextCompletedStep != null)
-                            {
-                                businessItem = Model.BusinessItems.FirstOrDefault(b => b.Actualises.Id == nextCompletedStep.ToStep.Id);
-                                <div class="block--border__bottom">
-                                    <h2>@businessItem.Actualises.Value</h2>
-                                    <p>Is actualised by @businessItem.Title</p>
-                                </div>
-                                <div class="center-text">&dArr;</div>
-                                nextCompletedStep = Model.Routes
-                                    .Where(r => r.FromStep.Id == businessItem.Actualises.Id && stepsDone.Contains(r.ToStep.Id))
-                                    .SingleOrDefault();
-                            }
-                            Html.RenderPartial("PathwayRoute", new PathwayRouteViewModel() { FromStepId = businessItem.Actualises.Id, Routes = Model.Routes });
-                        }
-                    </div>
-                </li>
+        <ul>
+            @{
+                int lastStepId = 0;
+                foreach (int stepId in beginSteps)
+                {
+                    BusinessItem businessItem = Model.BusinessItems.FirstOrDefault(b => b.Actualises.Exists(s => s.Id == stepId));
+                    ReferenceTable step = businessItem.Actualises.FirstOrDefault(s => s.Id == stepId);
+                    <li class="list--block">
+                        <p>@Html.ActionLink(step.Value, "Details", "Step", new { id = step.Id }, new { }) is actualised by [@businessItem.Title]</p>
+                        <p class="center-text">&dArr;</p>
+                    </li>
+                    ProcedureRouteItem nextCompletedStep = Model.Routes
+                        .Where(r => businessItem.Actualises.Exists(s => s.Id == r.FromStep.Id) && stepsDone.Contains(r.ToStep.Id))
+                        .SingleOrDefault();
+                    lastStepId = nextCompletedStep?.ToStep?.Id ?? step.Id;
+                    while (nextCompletedStep != null)
+                    {
+                        businessItem = Model.BusinessItems.FirstOrDefault(b => b.Actualises.Exists(s => s.Id == nextCompletedStep.ToStep.Id));
+                        <li class="list--block">
+                            <p>@Html.ActionLink(nextCompletedStep.ToStep.Value, "Details", "Step", new { id = nextCompletedStep.ToStep.Id }, new { }) is actualised by [@businessItem.Title]</p>
+                            <p class="center-text">&dArr;</p>
+                        </li>
+                        nextCompletedStep = Model.Routes
+                            .Where(r => businessItem.Actualises.Exists(s => s.Id == r.FromStep.Id) && stepsDone.Contains(r.ToStep.Id))
+                            .SingleOrDefault();
+                        lastStepId = nextCompletedStep?.ToStep?.Id ?? lastStepId;
+                    }
+                }
             }
         </ul>
+        <div class="block--border__bottom">
+            @{Html.RenderPartial("PathwayRoute", new PathwayRouteViewModel() { FromStepId = lastStepId, Routes = Model.Routes });}
+        </div>
     </div>
 </section>
