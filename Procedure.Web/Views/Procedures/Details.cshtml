@@ -9,7 +9,7 @@
             foreach (StepItem step in Model.EntryPoints)
             {
                 <details>
-                    <summary>@Html.ActionLink(step.Title, "Details", "Step", new { id = step.Id }, new { })</summary>
+                    <summary>@Html.ActionLink(step.Title, "Details", "Steps", new { id = step.Id }, new { })</summary>
                     @{
                         IEnumerable<RouteItem> children = Model.Routes
                         .Where(r => r.FromStep.Id == step.Id)
