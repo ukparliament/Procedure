@@ -5,7 +5,7 @@
     foreach (RouteItem route in Model.Children)
     {
         IEnumerable<RouteItem> children = Model.Routes
-            .Where(r => r.FromStep.Id == route.ToStep.Id && r.FromStep.Id!=r.ToStep.Id)
+            .Where(r => r.FromStep.Id == route.ToStep.Id && r.FromStep.Id != r.ToStep.Id)
             .Distinct();
         RouteStepViewModel routeStep = new RouteStepViewModel()
         {
@@ -23,10 +23,10 @@
                     Html.RenderPartial("Route", nestedRoute);
                 }
             </details>
-                    }
-                    else
-                    {
-            <div>@{Html.RenderPartial("RouteStep", routeStep);}</div>
+        }
+        else
+        {
+            <div class="details">@{Html.RenderPartial("RouteStep", routeStep);}</div>
         }
     }
 }

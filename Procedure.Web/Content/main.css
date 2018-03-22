@@ -1,11 +1,15 @@
-﻿details, .details {
+﻿details {
     margin-left: 15px;
 }
 
+.details {
+    margin-left: 20px;
+}
 
 @supports (-ms-ime-align:auto) {
-    details {
+    details, .details {
         list-style: none;
+        display: block;
     }
 
     summary::-webkit-details-marker {
