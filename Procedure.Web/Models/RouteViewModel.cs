@@ -4,7 +4,7 @@ namespace Procedure.Web.Models
 {
     public class RouteViewModel
     {
-        public List<ProcedureRouteItem> Routes { get; set; }
-        public List<ProcedureRouteItem> Children { get; set; }
+        public List<RouteItem> Routes { get; set; }
+        public List<RouteItem> Children { get; set; }
     }
 }

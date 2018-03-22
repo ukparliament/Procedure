@@ -20,15 +20,9 @@
         <ul class="list--block">
             @foreach (StepItem step in Model.OrderBy(p => p.Title))
             {
-                <li>
-                    <div class="list--details">
-                        <h2>@step.Title</h2>
-                        <p>Id @step.Id</p>
-                    </div>
-                    <div>
-                        @Html.ActionLink("Details", "Details", "Step", new { id = step.Id }, new { @class = "btn--secondary" })
-                    </div>
-                </li>
+            <li>
+                @Html.ActionLink(step.Title, "Details", "Steps", new { id = step.Id }, new {  })
+            </li>
             }
         </ul>
     </div>

@@ -1,0 +1,20 @@
+﻿@using Procedure.Web.Models
+@model WorkPackagePathwayViewModel
+
+<section>
+    <div class="container">
+        <div class="block--border">
+            <h2>@Model.WorkPackage.Title</h2>
+            <dl class="list--definition">
+                <dt>Subject to </dt>
+                <dd>@Html.ActionLink(Model.WorkPackage.SubjectTo.Value, "Details", "Procedure", new { id = Model.WorkPackage.SubjectTo.Id }, new { })</dd>
+            </dl>
+        </div>
+    </div>
+</section>
+
+<section>
+    <div class="container">
+        @{Html.RenderPartial("DetailsRoute", Model.Routes); }
+    </div>
+</section>

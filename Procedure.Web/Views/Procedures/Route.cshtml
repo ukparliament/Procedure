@@ -1,0 +1,32 @@
+﻿@using Procedure.Web.Models
+@model RouteViewModel
+
+@{
+    foreach (RouteItem route in Model.Children)
+    {
+        IEnumerable<RouteItem> children = Model.Routes
+            .Where(r => r.FromStep.Id == route.ToStep.Id && r.FromStep.Id!=r.ToStep.Id)
+            .Distinct();
+        RouteStepViewModel routeStep = new RouteStepViewModel()
+        {
+            RouteKind = route.RouteKind.ToSharepointItem<RouteTypeItem>().RouteKind,
+            Step = route.ToStep.ToSharepointItem<StepItem>()
+        };
+        if (children.Any())
+        {
+            <details>
+                <summary>
+                    @{Html.RenderPartial("RouteStep", routeStep);}
+                </summary>
+                @{
+                    RouteViewModel nestedRoute = new RouteViewModel() { Routes = Model.Routes, Children = children.ToList() };
+                    Html.RenderPartial("Route", nestedRoute);
+                }
+            </details>
+                    }
+                    else
+                    {
+            <div>@{Html.RenderPartial("RouteStep", routeStep);}</div>
+        }
+    }
+}

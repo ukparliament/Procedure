@@ -1,7 +1,7 @@
 ﻿namespace Procedure.Web.Models
 {
-    public class WorkPackageItem : BaseSharepointTable
+    public class WorkPackageItem : BaseSharepointItem
     {
-        public ReferenceTable SubjectTo { get; set; }
+        public SharepointLookupItem SubjectTo { get; set; }
     }
 }

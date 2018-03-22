@@ -1,6 +1,6 @@
 ﻿namespace Procedure.Web.Models
 {
-    public class ProcedureItem : BaseSharepointTable
+    public class ProcedureItem : BaseSharepointItem
     {
 
     }

@@ -1,0 +1,27 @@
+﻿@using Procedure.Web.Models
+@using System.Linq
+@model ProcedureDetailViewModel
+
+<section>
+    <div class="container">
+        <h2>@Model.Procedure.Title</h2>
+        @{
+            foreach (StepItem step in Model.EntryPoints)
+            {
+                <details>
+                    <summary>@Html.ActionLink(step.Title, "Details", "Step", new { id = step.Id }, new { })</summary>
+                    @{
+                        IEnumerable<RouteItem> children = Model.Routes
+                        .Where(r => r.FromStep.Id == step.Id)
+                        .Distinct();
+                        if (children.Any())
+                        {
+                            RouteViewModel nestedRoute = new RouteViewModel() { Routes = Model.Routes, Children = children.ToList() };
+                            Html.RenderPartial("Route", nestedRoute);
+                        }
+                    }
+                </details>
+            }
+        }
+    </div>
+</section>

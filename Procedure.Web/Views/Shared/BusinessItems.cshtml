@@ -1,0 +1,19 @@
+﻿@using Procedure.Web.Models
+@model List<BaseSharepointItem>
+
+@if (Model != null && Model.Any())
+{
+    if (Model.Count == 1)
+    {
+        <span>[@Model[0].Title]</span>
+    }
+    else
+    {
+        <ul class="list--definition">
+            @foreach (BaseSharepointItem businessItem in Model)
+            {
+                <li>[@businessItem.Title]</li>
+            }
+        </ul>
+    }
+}

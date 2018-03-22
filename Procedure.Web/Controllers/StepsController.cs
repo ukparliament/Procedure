@@ -1,22 +1,22 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Procedure.Web.Models;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Web;
 using System.Web.Mvc;
 
 namespace Procedure.Web.Controllers
 {
-    public class StepController:BaseController
+    [RoutePrefix("Steps")]
+    public class StepsController : BaseController
     {
+        [Route]
         public ActionResult Index()
         {
             return ShowList<StepItem>(ProcedureStepListId);
         }
 
+        [Route("{id:int}")]
         public ActionResult Details(int id)
         {
             StepDetailViewModel viewModel = new StepDetailViewModel();
@@ -26,7 +26,7 @@ namespace Procedure.Web.Controllers
             {
                 stepResponse = responseMessage.Content.ReadAsStringAsync().Result;
             }
-            viewModel.Step= ((JObject)JsonConvert.DeserializeObject(stepResponse)).ToObject<StepItem>();
+            viewModel.Step = ((JObject)JsonConvert.DeserializeObject(stepResponse)).ToObject<StepItem>();
 
             string routeResponse = null;
             using (HttpResponseMessage responseMessage = GetList(ProcedureRouteListId, filter: $"FromStep/ID eq {id} or ToStep/ID eq {id}"))
@@ -34,7 +34,7 @@ namespace Procedure.Web.Controllers
                 routeResponse = responseMessage.Content.ReadAsStringAsync().Result;
             }
             JObject jsonRoute = (JObject)JsonConvert.DeserializeObject(routeResponse);
-            viewModel.Routes = ((JArray)jsonRoute.SelectToken("value")).ToObject<List<ProcedureRouteItem>>();
+            viewModel.Routes = ((JArray)jsonRoute.SelectToken("value")).ToObject<List<RouteItem>>();
 
             string businessItemResponse = null;
             using (HttpResponseMessage responseMessage = GetList(ProcedureBusinessItemListId, filter: $"Actualises/ID eq {id}"))

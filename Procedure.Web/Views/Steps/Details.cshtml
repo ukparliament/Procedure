@@ -1,0 +1,68 @@
+﻿@using Procedure.Web.Models
+@using System.Linq
+@model StepDetailViewModel
+
+<section>
+    <div class="container">
+        <h2>@Model.Step.Title</h2>
+
+        <div class="block--border__bottom">
+            @if (Model.Routes.Any())
+            {
+                <h3>Present in following routes</h3>
+                <ul class="list--details">
+                    @foreach (RouteItem route in Model.Routes)
+                    {
+                        if (route.FromStep.Id == Model.Step.Id)
+                        {
+                            <li>@route.FromStep.Value @route.RouteKind.Value @Html.ActionLink(route.ToStep.Value, "Details", "Steps", new { id = route.ToStep.Id }, new { })</li>
+                        }
+                        else
+                        {
+                            <li>@Html.ActionLink(route.FromStep.Value, "Details", "Steps", new { id = route.FromStep.Id }, new { }) @route.RouteKind.Value @route.ToStep.Value</li>
+                        }
+                    }
+                </ul>
+            }
+            else
+            {
+                <h3>Not present in any route</h3>
+            }
+        </div>
+
+        <div class="block--border__bottom">
+            @if (Model.BusinessItems.Any())
+            {
+                <h3>Actualised by following business items</h3>
+                <ul class="list--details">
+                    @foreach (BusinessItem businessItem in Model.BusinessItems.OrderBy(p => p.Id))
+                    {
+                        <li>
+                            [@businessItem.Title] belongs to
+                            @if (businessItem.BelongsTo.Count == 1)
+                            {
+                                @Html.ActionLink(businessItem.BelongsTo[0].Value, "Details", "WorkPackages", new { id = businessItem.BelongsTo[0].Id }, new { })
+                            }
+                            else
+                            {
+                                <div>
+                                    <ul class="list--details">
+                                        @foreach (SharepointLookupItem workPackage in businessItem.BelongsTo)
+                                        {
+                                            <li>@Html.ActionLink(workPackage.Value, "Details", "WorkPackages", new { id = workPackage.Id }, new { })</li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <h3>Not actualised by any business item</h3>
+            }
+        </div>
+
+    </div>
+</section>

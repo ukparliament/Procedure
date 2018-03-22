@@ -3,18 +3,18 @@
 
 @{
     string triggerClass = string.Empty;
-    switch (Model.RouteTypeId)
+    switch (Model.RouteKind)
     {
-        case 1:
+        case RouteType.Causes:
             triggerClass = "theme--grey-4";
             break;
-        case 2:
+        case RouteType.Allows:
             triggerClass = "theme--white";
             break;
-        case 3:
+        case RouteType.Precludes:
             triggerClass = "theme--caution";
             break;
     }
 }
-<span><span class="hint @triggerClass">@Model.RouteTypeText</span> @Html.ActionLink(Model.StepText, "Details", "Step", new { id = Model.StepId }, new { })</span>
+<span><span class="hint @triggerClass">@Model.RouteKind</span> @Html.ActionLink(Model.Step.Title, "Details", "Step", new { id = Model.Step.Id }, new { })</span>
 

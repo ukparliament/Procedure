@@ -2,9 +2,9 @@
 
 namespace Procedure.Web.Models
 {
-    public class BusinessItem : BaseSharepointTable
+    public class BusinessItem : BaseSharepointItem
     {
-        public ReferenceTable BelongsTo { get; set; }
-        public List<ReferenceTable> Actualises { get; set; }
+        public List<SharepointLookupItem> BelongsTo { get; set; }
+        public List<SharepointLookupItem> Actualises { get; set; }
     }
 }

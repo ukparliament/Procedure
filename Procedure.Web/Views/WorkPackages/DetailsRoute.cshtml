@@ -1,0 +1,35 @@
+﻿@using Procedure.Web.Models
+@using System.Linq
+@model List<WorkPackageRoute>
+
+
+<ul class="list--details">
+    @foreach (WorkPackageRoute route in Model)
+    {
+        if (route.BusinessItems != null && route.BusinessItems.Any())
+        {
+            <li class="list--block">
+                <p>
+                    @Html.ActionLink(route.Step.Title, "Details", "Steps", new { id = route.Step.Id }, new { })
+                </p>
+                <p>Actualised by @{ Html.RenderPartial("BusinessItems", route.BusinessItems); }</p>
+                <p class="center-text">&dArr;</p>
+                @{Html.RenderPartial("DetailsRoute", route.FollowingRoutes); }
+            </li>
+        }
+        else
+        {
+            <li>
+                <div>&rArr; @{Html.RenderPartial("RouteStep", new RouteStepViewModel() { RouteKind = route.RouteKind, Step = route.Step });}</div>
+                <div>
+                    @{
+                        if (route.FollowingRoutes != null && route.FollowingRoutes.Any())
+                        {
+                            Html.RenderPartial("DetailsRoute", route.FollowingRoutes);
+                        }
+                    }
+                </div>
+            </li>
+        }
+    }
+</ul>
