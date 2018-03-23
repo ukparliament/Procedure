@@ -50,7 +50,7 @@ namespace Procedure.Web.Controllers
                 .ToArray();
 
             List<ProcedureRouteTree> procedureTree = GenerateProcedureTree(procedureId);
-            List<int> precludedSteps = giveMePrecludedList(null, stepsDone, procedureTree);
+            List<int> precludedSteps = giveMePrecludedSteps(null, stepsDone, procedureTree);
 
             foreach (ProcedureRouteTree procedureRouteTreeItem in procedureTree)
             {
@@ -105,17 +105,16 @@ namespace Procedure.Web.Controllers
             return result;
         }
 
-        private List<int> giveMePrecludedList(int? parentStepId, int[] stepsDone, List<ProcedureRouteTree> procedureTree)
+        private List<int> giveMePrecludedSteps(int? parentStepId, int[] stepsDone, List<ProcedureRouteTree> procedureTree)
         {
             List<int> result = new List<int>();
             foreach (ProcedureRouteTree procedureRouteTreeItem in procedureTree)
             {
-                if (((procedureRouteTreeItem.RouteKind == RouteType.Precludes) &&
-                    (parentStepId.HasValue) && (stepsDone.Contains(parentStepId.Value))) ||
-                    ((parentStepId.HasValue == false) && stepsDone.Contains(procedureRouteTreeItem.Step.Id)))
+                if ((procedureRouteTreeItem.RouteKind == RouteType.Precludes) &&
+                    (parentStepId.HasValue) && (stepsDone.Contains(parentStepId.Value)))
                     result.Add(procedureRouteTreeItem.Step.Id);
                 if (stepsDone.Contains(procedureRouteTreeItem.Step.Id))
-                    result.AddRange(giveMePrecludedList(procedureRouteTreeItem.Step.Id, stepsDone, procedureRouteTreeItem.ChildrenRoutes));
+                    result.AddRange(giveMePrecludedSteps(procedureRouteTreeItem.Step.Id, stepsDone, procedureRouteTreeItem.ChildrenRoutes));
             }
 
             return result;
