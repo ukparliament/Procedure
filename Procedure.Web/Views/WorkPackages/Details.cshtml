@@ -1,5 +1,5 @@
 ﻿@using Procedure.Web.Models
-@model WorkPackagePathwayViewModel
+@model WorkPackageDetailViewModel
 
 <section>
     <div class="container">
@@ -15,6 +15,6 @@
 
 <section>
     <div class="container">
-        @{Html.RenderPartial("DetailsRoute", Model.Routes); }
+        @{Html.RenderPartial("DetailsRoute", Model.Tree); }
     </div>
 </section>

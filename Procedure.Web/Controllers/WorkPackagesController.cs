@@ -20,7 +20,7 @@ namespace Procedure.Web.Controllers
         [Route("{id:int}")]
         public ActionResult Details(int id)
         {
-            WorkPackagePathwayViewModel viewModel = new WorkPackagePathwayViewModel();
+            WorkPackageDetailViewModel viewModel = new WorkPackageDetailViewModel();
 
             string workPackageResponse = null;
             using (HttpResponseMessage responseMessage = GetItem(ProcedureWorkPackageListId, id))
@@ -35,76 +35,56 @@ namespace Procedure.Web.Controllers
                 businessItemResponse = responseMessage.Content.ReadAsStringAsync().Result;
             }
             JObject jsonBusinessItem = (JObject)JsonConvert.DeserializeObject(businessItemResponse);
-            List<BusinessItem> businessItems = ((JArray)jsonBusinessItem.SelectToken("value")).ToObject<List<BusinessItem>>();
+            List<BusinessItem> allBusinessItems = ((JArray)jsonBusinessItem.SelectToken("value")).ToObject<List<BusinessItem>>();
 
-            string routeResponse = null;
-            using (HttpResponseMessage responseMessage = GetList(ProcedureRouteListId, filter: $"Procedure/ID eq {viewModel.WorkPackage.SubjectTo.Id}"))
+            viewModel.Tree = new List<WorkPackageRouteTree>();
+            List<ProcedureRouteTree> procedureTree = GenerateProcedureTree(viewModel.WorkPackage.SubjectTo.Id);
+            foreach (ProcedureRouteTree procedureRouteTreeItem in procedureTree)
             {
-                routeResponse = responseMessage.Content.ReadAsStringAsync().Result;
+                List<BaseSharepointItem> businessItems = allBusinessItems
+                    .Where(bi => bi.Actualises.Any(s => s.Id == procedureRouteTreeItem.Step.Id))
+                    .Select(bi => new BaseSharepointItem() { Id = bi.Id, Title = bi.Title })
+                    .ToList();
+                if (businessItems.Any())
+                {
+                    allBusinessItems.RemoveAll(bi => businessItems.Exists(b => b.Id == bi.Id));
+                    viewModel.Tree.Add(new WorkPackageRouteTree()
+                    {
+                        BusinessItems = businessItems,
+                        SelfReferencedRouteKind = procedureRouteTreeItem.SelfReferencedRouteKind,
+                        RouteKind = procedureRouteTreeItem.RouteKind,
+                        Step = procedureRouteTreeItem.Step,
+                        ChildrenRoutes = giveMeFilteredChildren(allBusinessItems, procedureRouteTreeItem.ChildrenRoutes)
+                    });
+                }
             }
-            JObject jsonRoute = (JObject)JsonConvert.DeserializeObject(routeResponse);
-            List<RouteItem> routes = ((JArray)jsonRoute.SelectToken("value")).ToObject<List<RouteItem>>();
-
-            viewModel.Routes = giveMePathway(businessItems, routes);
 
             return View(viewModel);
         }
 
-        public List<WorkPackageRoute> giveMePathway(List<BusinessItem> businessItems, List<RouteItem> routes)
+        public List<WorkPackageRouteTree> giveMeFilteredChildren(List<BusinessItem> allBusinessItems, List<ProcedureRouteTree> procedureTree)
         {
-            RouteItem[] filteredRouteItems = routes.Where(to => to.FromStep.Id != to.ToStep.Id).ToArray();
-            int[] entrySteps = filteredRouteItems
-                .Where(r => filteredRouteItems.Any(to => to.ToStep.Id == r.FromStep.Id) == false)
-                .Select(r => r.FromStep.Id)
-                .Distinct()
-                .ToArray();
-            List<int> stepsDone = businessItems
-                .SelectMany(bi => bi.Actualises.Select(s => s.Id))
-                .ToList();
-            List<WorkPackageRoute> result = new List<WorkPackageRoute>();
-            stepsDone.Sort();
-            while (stepsDone.Any())
+            List<WorkPackageRouteTree> result = new List<WorkPackageRouteTree>();
+
+            foreach (ProcedureRouteTree procedureRouteTreeItem in procedureTree)
             {
-                int stepId = stepsDone.FirstOrDefault();
-                RouteItem route = filteredRouteItems.FirstOrDefault(r => r.FromStep.Id == stepId);
-                WorkPackageRoute workPackageRoute = new WorkPackageRoute()
-                {
-                    RouteKind = RouteType.None,
-                    FollowingRoutes = new List<WorkPackageRoute>(),
-                    Step = route.FromStep.ToSharepointItem<StepItem>(),
-                    BusinessItems = businessItems
-                    .Where(bi => bi.Actualises.Any(s => s.Id == stepId))
+                List<BaseSharepointItem> businessItems = allBusinessItems
+                    .Where(bi => bi.Actualises.Any(s => s.Id == procedureRouteTreeItem.Step.Id))
                     .Select(bi => new BaseSharepointItem() { Id = bi.Id, Title = bi.Title })
-                    .ToList()
-                };
-                result.Add(workPackageRoute);
-                stepsDone.Remove(stepId);
-            }
-            WorkPackageRoute lastDone = result.LastOrDefault();
-            lastDone.FollowingRoutes = giveMeRoutes(lastDone.Step.Id, businessItems, routes);
-
-            return result;
-        }
-
-        public List<WorkPackageRoute> giveMeRoutes(int stepId, List<BusinessItem> businessItems, List<RouteItem> routes)
-        {
-            List<WorkPackageRoute> result = new List<WorkPackageRoute>();
-            IEnumerable<RouteItem> children = routes
-                .Where(r => r.FromStep.Id == stepId && r.FromStep.Id != r.ToStep.Id);
-            foreach (RouteItem child in children)
-            {
-                result.Add(new WorkPackageRoute()
+                    .ToList();
+                if (businessItems.Any() || (allBusinessItems.Any() == false))
                 {
-                    RouteKind = child.RouteKind.ToSharepointItem<RouteTypeItem>().RouteKind,
-                    Step = child.ToStep.ToSharepointItem<StepItem>(),
-                    FollowingRoutes = giveMeRoutes(child.ToStep.Id, businessItems, routes),
-                    BusinessItems = businessItems
-                    .Where(bi => bi.Actualises.Any(s => s.Id == child.ToStep.Id))
-                    .Select(bi => new BaseSharepointItem() { Id = bi.Id, Title = bi.Title })
-                    .ToList()
-                });
+                    allBusinessItems.RemoveAll(bi => businessItems.Exists(b => b.Id == bi.Id));
+                    result.Add(new WorkPackageRouteTree()
+                    {
+                        BusinessItems = businessItems,
+                        SelfReferencedRouteKind = procedureRouteTreeItem.SelfReferencedRouteKind,
+                        RouteKind = procedureRouteTreeItem.RouteKind,
+                        Step = procedureRouteTreeItem.Step,
+                        ChildrenRoutes = giveMeFilteredChildren(allBusinessItems, procedureRouteTreeItem.ChildrenRoutes)
+                    });
+                }
             }
-
             return result;
         }
     }

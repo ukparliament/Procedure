@@ -1,0 +1,22 @@
+﻿@using Procedure.Web.Models
+@using System.Linq
+@model List<ProcedureRouteTree>
+
+@{
+    foreach (ProcedureRouteTree item in Model)
+    {
+        if (item.ChildrenRoutes.Any())
+        {
+            <details>
+                <summary>@{Html.RenderPartial("RouteStep", item as RouteStep);}</summary>
+                @{
+                    Html.RenderPartial("Tree", item.ChildrenRoutes);
+                }
+            </details>
+        }
+        else
+        {
+            <div class="details">@{Html.RenderPartial("RouteStep", item as RouteStep);}</div>
+        }
+    }
+}

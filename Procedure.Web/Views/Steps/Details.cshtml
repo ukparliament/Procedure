@@ -13,13 +13,18 @@
                 <ul class="list--details">
                     @foreach (RouteItem route in Model.Routes)
                     {
+                        if ((route.FromStep.Id == Model.Step.Id) && (route.ToStep.Id == Model.Step.Id))
+                        {
+                            <li>@route.FromStep.Value @route.RouteKind @route.ToStep.Value</li>
+                        }
+                        else
                         if (route.FromStep.Id == Model.Step.Id)
                         {
-                            <li>@route.FromStep.Value @route.RouteKind.Value @Html.ActionLink(route.ToStep.Value, "Details", "Steps", new { id = route.ToStep.Id }, new { })</li>
+                            <li>@route.FromStep.Value @route.RouteKind @Html.ActionLink(route.ToStep.Value, "Details", "Steps", new { id = route.ToStep.Id }, new { })</li>
                         }
                         else
                         {
-                            <li>@Html.ActionLink(route.FromStep.Value, "Details", "Steps", new { id = route.FromStep.Id }, new { }) @route.RouteKind.Value @route.ToStep.Value</li>
+                            <li>@Html.ActionLink(route.FromStep.Value, "Details", "Steps", new { id = route.FromStep.Id }, new { }) @route.RouteKind @route.ToStep.Value</li>
                         }
                     }
                 </ul>

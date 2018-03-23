@@ -1,5 +1,5 @@
 ﻿@using Procedure.Web.Models
-@model RouteStepViewModel
+@model RouteStep
 
 @{
     string triggerClass = string.Empty;
@@ -16,5 +16,15 @@
             break;
     }
 }
-<span><span class="hint @triggerClass">@Model.RouteKind</span> @Html.ActionLink(Model.Step.Title, "Details", "Steps", new { id = Model.Step.Id }, new { })</span>
+<span>
+    @if (Model.RouteKind != RouteType.None)
+    {
+        <span class="hint @triggerClass">@Model.RouteKind</span>
+    }
+    @Html.ActionLink(Model.Step.Value, "Details", "Steps", new { id = Model.Step.Id }, new { })
+    @if (Model.SelfReferencedRouteKind != RouteType.None)
+    {
+        <span> (@Model.SelfReferencedRouteKind @Html.ActionLink(Model.Step.Value, "Details", "Steps", new { id = Model.Step.Id }, new { }))</span>
+    }
+</span>
 

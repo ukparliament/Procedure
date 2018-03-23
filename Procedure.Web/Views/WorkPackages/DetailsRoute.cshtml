@@ -1,32 +1,33 @@
 ﻿@using Procedure.Web.Models
 @using System.Linq
-@model List<WorkPackageRoute>
+@model List<WorkPackageRouteTree>
 
 
 <ul class="list--details">
-    @foreach (WorkPackageRoute route in Model)
+    @foreach (WorkPackageRouteTree routeTree in Model)
     {
-        if (route.BusinessItems != null && route.BusinessItems.Any())
+        if (routeTree.BusinessItems.Any())
         {
             <li class="list--block">
                 <p>
-                    @Html.ActionLink(route.Step.Title, "Details", "Steps", new { id = route.Step.Id }, new { })
+                    @{Html.RenderPartial("RouteStep", routeTree as RouteStep);}
                 </p>
-                <p>Actualised by @{ Html.RenderPartial("BusinessItems", route.BusinessItems); }</p>
+                <p>Actualised by @{ Html.RenderPartial("BusinessItems", routeTree.BusinessItems); }</p>
                 <p class="center-text">&dArr;</p>
-                @{Html.RenderPartial("DetailsRoute", route.FollowingRoutes); }
+                @if (routeTree.ChildrenRoutes.Any())
+                {
+                    Html.RenderPartial("DetailsRoute", routeTree.ChildrenRoutes);
+                }
             </li>
         }
         else
         {
-            <li>
-                <div>&rArr; @{Html.RenderPartial("RouteStep", new RouteStepViewModel() { RouteKind = route.RouteKind, Step = route.Step });}</div>
+            <li class="list--block">
+                <div>&rArr; @{Html.RenderPartial("RouteStep", routeTree as RouteStep);}</div>
                 <div>
-                    @{
-                        if (route.FollowingRoutes != null && route.FollowingRoutes.Any())
-                        {
-                            Html.RenderPartial("DetailsRoute", route.FollowingRoutes);
-                        }
+                    @if (routeTree.ChildrenRoutes.Any())
+                    {
+                        Html.RenderPartial("DetailsRoute", routeTree.ChildrenRoutes);
                     }
                 </div>
             </li>

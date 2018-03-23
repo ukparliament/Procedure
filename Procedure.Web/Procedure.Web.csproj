@@ -145,21 +145,19 @@
     <Compile Include="Models\BaseSharepointItem.cs" />
     <Compile Include="Models\BusinessItem.cs" />
     <Compile Include="Models\ListRequestObject.cs" />
-    <Compile Include="Models\PathwayRouteViewModel.cs" />
     <Compile Include="Models\ProcedureDetailViewModel.cs" />
     <Compile Include="Models\ProcedureItem.cs" />
+    <Compile Include="Models\ProcedureRouteTree.cs" />
     <Compile Include="Models\RouteItem.cs" />
     <Compile Include="Models\RouteType.cs" />
-    <Compile Include="Models\RouteTypeItem.cs" />
     <Compile Include="Models\SharepointLookupItem.cs" />
-    <Compile Include="Models\RouteStepViewModel.cs" />
+    <Compile Include="Models\RouteStep.cs" />
     <Compile Include="Models\RouteViewModel.cs" />
     <Compile Include="Models\StepDetailViewModel.cs" />
     <Compile Include="Models\StepItem.cs" />
-    <Compile Include="Models\WorkPackagePathwayViewModel.cs" />
     <Compile Include="Models\WorkPackageDetailViewModel.cs" />
     <Compile Include="Models\WorkPackageItem.cs" />
-    <Compile Include="Models\WorkPackageRoute.cs" />
+    <Compile Include="Models\WorkPackageRouteTree.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -185,7 +183,6 @@
     <Content Include="Views\Procedures\Index.cshtml" />
     <Content Include="Secrets.config" />
     <Content Include="Views\Procedures\Details.cshtml" />
-    <Content Include="Views\Procedures\Route.cshtml" />
     <Content Include="Views\WorkPackages\Index.cshtml" />
     <Content Include="Views\Shared\RouteStep.cshtml" />
     <Content Include="Views\WorkPackages\Details.cshtml" />
@@ -193,6 +190,7 @@
     <Content Include="Views\Steps\Index.cshtml" />
     <Content Include="Views\Steps\Details.cshtml" />
     <Content Include="Views\Shared\BusinessItems.cshtml" />
+    <Content Include="Views\Procedures\Tree.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

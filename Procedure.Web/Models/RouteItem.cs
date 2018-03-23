@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System;
 
 namespace Procedure.Web.Models
 {
@@ -10,9 +11,18 @@ namespace Procedure.Web.Models
         public SharepointLookupItem FromStep { get; set; }
 
         [JsonProperty(PropertyName = "RouteType")]
-        public SharepointLookupItem RouteKind { get; set; }
+        public SharepointLookupItem RouteTypeItem { get; set; }
 
         public SharepointLookupItem ToStep { get; set; }
+
+        [JsonIgnore]
+        public RouteType RouteKind
+        {
+            get
+            {
+                return (RouteType)Enum.Parse(typeof(RouteType), RouteTypeItem?.Value ?? RouteType.None.ToString());
+            }
+        }
 
     }
 

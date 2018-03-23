@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using Procedure.Web.Models;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Linq;
 using System.Net.Http;
 using System.Web.Mvc;
 
@@ -54,5 +55,66 @@ namespace Procedure.Web.Controllers
 
             return View(items);
         }
+
+        internal List<ProcedureRouteTree> GenerateProcedureTree(int procedureId)
+        {
+            List<ProcedureRouteTree> result = new List<ProcedureRouteTree>();
+
+            string routeResponse = null;
+            using (HttpResponseMessage responseMessage = GetList(ProcedureRouteListId, filter: $"Procedure/ID eq {procedureId}"))
+            {
+                routeResponse = responseMessage.Content.ReadAsStringAsync().Result;
+            }
+            JObject jsonRoute = (JObject)JsonConvert.DeserializeObject(routeResponse);
+            List<RouteItem> routes = ((JArray)jsonRoute.SelectToken("value")).ToObject<List<RouteItem>>();
+            RouteItem[] filteredRouteItems = routes.Where(to => to.FromStep.Id != to.ToStep.Id).ToArray();
+            int[] entrySteps = filteredRouteItems
+                .Where(r => filteredRouteItems.Any(to => to.ToStep.Id == r.FromStep.Id) == false)
+                .Select(r => r.FromStep.Id)
+                .Distinct()
+                .ToArray();
+            RouteItem[] entryRoutes = entrySteps
+                .Select(s => routes.FirstOrDefault(r => r.FromStep.Id == s))
+                .ToArray();
+            List<ProcedureRouteTree> tree = new List<ProcedureRouteTree>();
+            foreach (RouteItem route in entryRoutes)
+            {
+                RouteItem selfReferenced = routes
+                    .FirstOrDefault(r => r.FromStep.Id == route.ToStep.Id && r.FromStep.Id == r.ToStep.Id);
+                tree.Add(new ProcedureRouteTree()
+                {
+                    SelfReferencedRouteKind = selfReferenced?.RouteKind ?? RouteType.None,
+                    RouteKind = RouteType.None,
+                    Step = route.FromStep,
+                    ChildrenRoutes = giveMeChildrenRoutes(route.FromStep.Id, routes)
+                });
+            }
+
+            return tree;
+        }
+
+        private List<ProcedureRouteTree> giveMeChildrenRoutes(int previousStepId, List<RouteItem> allRoutes)
+        {
+            List<ProcedureRouteTree> result = new List<ProcedureRouteTree>();
+            RouteItem[] children = allRoutes.Where(r => r.FromStep.Id == previousStepId).ToArray();
+            foreach (RouteItem route in children)
+            {
+                if (route.ToStep.Id != previousStepId)
+                {
+                    RouteItem selfReferenced = allRoutes
+                        .FirstOrDefault(r => r.FromStep.Id == route.ToStep.Id && r.FromStep.Id == r.ToStep.Id);
+                    result.Add(new ProcedureRouteTree()
+                    {
+                        SelfReferencedRouteKind = selfReferenced?.RouteKind ?? RouteType.None,
+                        RouteKind = route.RouteKind,
+                        Step = route.ToStep,
+                        ChildrenRoutes = giveMeChildrenRoutes(route.ToStep.Id, allRoutes)
+                    });
+                }
+            }
+
+            return result;
+        }
+
     }
 }
