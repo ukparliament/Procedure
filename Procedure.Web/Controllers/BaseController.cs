@@ -93,13 +93,13 @@ namespace Procedure.Web.Controllers
             return tree;
         }
 
-        private List<ProcedureRouteTree> giveMeChildrenRoutes(int previousStepId, List<RouteItem> allRoutes)
+        private List<ProcedureRouteTree> giveMeChildrenRoutes(int parentStepId, List<RouteItem> allRoutes)
         {
             List<ProcedureRouteTree> result = new List<ProcedureRouteTree>();
-            RouteItem[] children = allRoutes.Where(r => r.FromStep.Id == previousStepId).ToArray();
+            RouteItem[] children = allRoutes.Where(r => r.FromStep.Id == parentStepId).ToArray();
             foreach (RouteItem route in children)
             {
-                if (route.ToStep.Id != previousStepId)
+                if (route.ToStep.Id != parentStepId)
                 {
                     RouteItem selfReferenced = allRoutes
                         .FirstOrDefault(r => r.FromStep.Id == route.ToStep.Id && r.FromStep.Id == r.ToStep.Id);

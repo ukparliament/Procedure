@@ -10,7 +10,14 @@
         {
             <li class="list--block">
                 <p>
-                    @{Html.RenderPartial("RouteStep", routeTree as RouteStep);}
+                    @if ((routeTree.IsPrecluded) || (routeTree.SelfReferencedRouteKind==RouteType.Precludes))
+                    {
+                        <s>@{Html.RenderPartial("RouteStep", routeTree as RouteStep);}</s>
+                    }
+                    else
+                    {
+                        Html.RenderPartial("RouteStep", routeTree as RouteStep);
+                    }
                 </p>
                 <p>Actualised by @{ Html.RenderPartial("BusinessItems", routeTree.BusinessItems); }</p>
                 <p class="center-text">&dArr;</p>
@@ -23,7 +30,17 @@
         else
         {
             <li class="list--block">
-                <div>&rArr; @{Html.RenderPartial("RouteStep", routeTree as RouteStep);}</div>
+                <div>
+                    &rArr;
+                    @if (routeTree.IsPrecluded)
+                    {
+                        <s>@{Html.RenderPartial("RouteStep", routeTree as RouteStep);}</s>
+                    }
+                    else
+                    {
+                        Html.RenderPartial("RouteStep", routeTree as RouteStep);
+                    }
+                </div>
                 <div>
                     @if (routeTree.ChildrenRoutes.Any())
                     {

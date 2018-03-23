@@ -29,16 +29,29 @@ namespace Procedure.Web.Controllers
             }
             viewModel.WorkPackage = ((JObject)JsonConvert.DeserializeObject(workPackageResponse)).ToObject<WorkPackageItem>();
 
+            viewModel.Tree = giveMeTheTree(id, viewModel.WorkPackage.SubjectTo.Id);
+
+            return View(viewModel);
+        }
+
+        private List<WorkPackageRouteTree> giveMeTheTree(int workPackageId, int procedureId)
+        {
+            List<WorkPackageRouteTree> result = new List<WorkPackageRouteTree>();
+
             string businessItemResponse = null;
-            using (HttpResponseMessage responseMessage = GetList(ProcedureBusinessItemListId, filter: $"BelongsTo/ID eq {id}"))
+            using (HttpResponseMessage responseMessage = GetList(ProcedureBusinessItemListId, filter: $"BelongsTo/ID eq {workPackageId}"))
             {
                 businessItemResponse = responseMessage.Content.ReadAsStringAsync().Result;
             }
             JObject jsonBusinessItem = (JObject)JsonConvert.DeserializeObject(businessItemResponse);
             List<BusinessItem> allBusinessItems = ((JArray)jsonBusinessItem.SelectToken("value")).ToObject<List<BusinessItem>>();
+            int[] stepsDone = allBusinessItems
+                .SelectMany(bi => bi.Actualises.Select(s => s.Id))
+                .ToArray();
 
-            viewModel.Tree = new List<WorkPackageRouteTree>();
-            List<ProcedureRouteTree> procedureTree = GenerateProcedureTree(viewModel.WorkPackage.SubjectTo.Id);
+            List<ProcedureRouteTree> procedureTree = GenerateProcedureTree(procedureId);
+            List<int> precludedSteps = giveMePrecludedList(null, stepsDone, procedureTree);
+
             foreach (ProcedureRouteTree procedureRouteTreeItem in procedureTree)
             {
                 List<BaseSharepointItem> businessItems = allBusinessItems
@@ -47,22 +60,25 @@ namespace Procedure.Web.Controllers
                     .ToList();
                 if (businessItems.Any())
                 {
-                    allBusinessItems.RemoveAll(bi => businessItems.Exists(b => b.Id == bi.Id));
-                    viewModel.Tree.Add(new WorkPackageRouteTree()
+                    foreach (BusinessItem businessItem in allBusinessItems.Where(bi => businessItems.Exists(b => b.Id == bi.Id)))
+                        businessItem.Actualises.RemoveAll(s => s.Id == procedureRouteTreeItem.Step.Id);
+                    allBusinessItems.RemoveAll(bi => bi.Actualises.Any() == false);
+                    result.Add(new WorkPackageRouteTree()
                     {
                         BusinessItems = businessItems,
+                        IsPrecluded = precludedSteps.Contains(procedureRouteTreeItem.Step.Id),
                         SelfReferencedRouteKind = procedureRouteTreeItem.SelfReferencedRouteKind,
                         RouteKind = procedureRouteTreeItem.RouteKind,
                         Step = procedureRouteTreeItem.Step,
-                        ChildrenRoutes = giveMeFilteredChildren(allBusinessItems, procedureRouteTreeItem.ChildrenRoutes)
+                        ChildrenRoutes = giveMeFilteredChildren(allBusinessItems, procedureRouteTreeItem.ChildrenRoutes, precludedSteps)
                     });
                 }
             }
 
-            return View(viewModel);
+            return result;
         }
 
-        public List<WorkPackageRouteTree> giveMeFilteredChildren(List<BusinessItem> allBusinessItems, List<ProcedureRouteTree> procedureTree)
+        private List<WorkPackageRouteTree> giveMeFilteredChildren(List<BusinessItem> allBusinessItems, List<ProcedureRouteTree> procedureTree, List<int> precludedSteps)
         {
             List<WorkPackageRouteTree> result = new List<WorkPackageRouteTree>();
 
@@ -72,20 +88,38 @@ namespace Procedure.Web.Controllers
                     .Where(bi => bi.Actualises.Any(s => s.Id == procedureRouteTreeItem.Step.Id))
                     .Select(bi => new BaseSharepointItem() { Id = bi.Id, Title = bi.Title })
                     .ToList();
-                if (businessItems.Any() || (allBusinessItems.Any() == false))
+                bool isPrecluded = precludedSteps.Contains(procedureRouteTreeItem.Step.Id);
+                foreach (BusinessItem businessItem in allBusinessItems.Where(bi => businessItems.Exists(b => b.Id == bi.Id)))
+                    businessItem.Actualises.RemoveAll(s => s.Id == procedureRouteTreeItem.Step.Id);
+                allBusinessItems.RemoveAll(bi => bi.Actualises.Any() == false);
+                result.Add(new WorkPackageRouteTree()
                 {
-                    allBusinessItems.RemoveAll(bi => businessItems.Exists(b => b.Id == bi.Id));
-                    result.Add(new WorkPackageRouteTree()
-                    {
-                        BusinessItems = businessItems,
-                        SelfReferencedRouteKind = procedureRouteTreeItem.SelfReferencedRouteKind,
-                        RouteKind = procedureRouteTreeItem.RouteKind,
-                        Step = procedureRouteTreeItem.Step,
-                        ChildrenRoutes = giveMeFilteredChildren(allBusinessItems, procedureRouteTreeItem.ChildrenRoutes)
-                    });
-                }
+                    BusinessItems = businessItems,
+                    IsPrecluded = isPrecluded,
+                    SelfReferencedRouteKind = procedureRouteTreeItem.SelfReferencedRouteKind,
+                    RouteKind = procedureRouteTreeItem.RouteKind,
+                    Step = procedureRouteTreeItem.Step,
+                    ChildrenRoutes = isPrecluded ? new List<WorkPackageRouteTree>() : giveMeFilteredChildren(allBusinessItems, procedureRouteTreeItem.ChildrenRoutes, precludedSteps)
+                });
             }
             return result;
         }
+
+        private List<int> giveMePrecludedList(int? parentStepId, int[] stepsDone, List<ProcedureRouteTree> procedureTree)
+        {
+            List<int> result = new List<int>();
+            foreach (ProcedureRouteTree procedureRouteTreeItem in procedureTree)
+            {
+                if (((procedureRouteTreeItem.RouteKind == RouteType.Precludes) &&
+                    (parentStepId.HasValue) && (stepsDone.Contains(parentStepId.Value))) ||
+                    ((parentStepId.HasValue == false) && stepsDone.Contains(procedureRouteTreeItem.Step.Id)))
+                    result.Add(procedureRouteTreeItem.Step.Id);
+                if (stepsDone.Contains(procedureRouteTreeItem.Step.Id))
+                    result.AddRange(giveMePrecludedList(procedureRouteTreeItem.Step.Id, stepsDone, procedureRouteTreeItem.ChildrenRoutes));
+            }
+
+            return result;
+        }
+
     }
 }
