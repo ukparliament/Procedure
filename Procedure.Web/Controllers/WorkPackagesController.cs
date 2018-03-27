@@ -1,6 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using GraphVizWrapper;
+using GraphVizWrapper.Commands;
+using GraphVizWrapper.Queries;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Procedure.Web.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -32,6 +36,73 @@ namespace Procedure.Web.Controllers
             viewModel.Tree = giveMeTheTree(id, viewModel.WorkPackage.SubjectTo.Id);
 
             return View(viewModel);
+        }
+
+        [Route("{id:int}/graph")]
+        public ActionResult Graph(int id)
+        {
+            WorkPackageDetailViewModel viewModel = new WorkPackageDetailViewModel();
+
+            string workPackageResponse = null;
+            using (HttpResponseMessage responseMessage = GetItem(ProcedureWorkPackageListId, id))
+            {
+                workPackageResponse = responseMessage.Content.ReadAsStringAsync().Result;
+            }
+            viewModel.WorkPackage = ((JObject)JsonConvert.DeserializeObject(workPackageResponse)).ToObject<WorkPackageItem>();
+            viewModel.Graph = giveMeTheGraph(id, viewModel.WorkPackage.SubjectTo.Id);
+
+            return View(viewModel);
+
+        }
+
+        private string giveMeTheGraph(int workPackageId, int procedureId)
+        {
+            var getStartProcessQuery = new GetStartProcessQuery();
+            var getProcessStartInfoQuery = new GetProcessStartInfoQuery();
+            var registerLayoutPluginCommand = new RegisterLayoutPluginCommand(getProcessStartInfoQuery, getStartProcessQuery);
+            var wrapper = new GraphGeneration(getStartProcessQuery,
+                                              getProcessStartInfoQuery,
+                                              registerLayoutPluginCommand);
+
+            // Get actualized steps (this needs workPackage ID param)
+            string businessItemResponse = null;
+            using (HttpResponseMessage responseMessage = GetList(ProcedureBusinessItemListId, filter: $"BelongsTo/ID eq {workPackageId}"))
+            {
+                businessItemResponse = responseMessage.Content.ReadAsStringAsync().Result;
+            }
+            JObject jsonBusinessItem = (JObject)JsonConvert.DeserializeObject(businessItemResponse);
+
+            List<BusinessItem> businessItemList = jsonBusinessItem.SelectToken("value").ToObject<List<BusinessItem>>();
+            int[] actualizedStepIds = businessItemList
+                .SelectMany(bi => bi.Actualises.Select(s => s.Id))
+                .ToArray();
+
+            // Get all their possible next steps (this needs procedure ID param)
+            string routeResponse = null;
+            using (HttpResponseMessage responseMessage = GetList(ProcedureRouteListId, filter: $"Procedure/ID eq {procedureId}"))
+            {
+                routeResponse = responseMessage.Content.ReadAsStringAsync().Result;
+            }
+            JObject jsonRoute = (JObject)JsonConvert.DeserializeObject(routeResponse);
+            List<RouteItem> routes = ((JArray)jsonRoute.SelectToken("value")).ToObject<List<RouteItem>>();
+            RouteItem[] filteredRouteItems = routes.Where(route => actualizedStepIds.Contains(route.FromStep.Id)).ToArray();
+            // Or use LINQ .Aggregate()
+
+            string toGraph = "";
+            foreach (RouteItem route in filteredRouteItems)
+            {
+                string newRoute = "", styling = "";
+                if (route.RouteKind.ToString().Equals("Causes")) { newRoute = String.Concat("\"", route.FromStep.Value, "\" -> \"", route.ToStep.Value, "\" [label = \"Causes\"]; "); }
+                if (route.RouteKind.ToString().Equals("Allows")) { newRoute = String.Concat("\"", route.FromStep.Value, "\" -> \"", route.ToStep.Value, "\" [label = \"Allows\"];"); }
+                if (route.RouteKind.ToString().Equals("Precludes")) { newRoute = String.Concat(" edge [color=red]; \"", route.FromStep.Value, "\" -> \"", route.ToStep.Value, "\" [label = \"Precludes\"]; edge [color=black];"); }
+                if (actualizedStepIds.Contains(route.FromStep.Id)) { styling = String.Concat("\"", route.FromStep.Value, "\" [style=filled,color=\"gray\"];"); toGraph += styling; }
+                toGraph += newRoute;
+            }
+
+            byte[] output = wrapper.GenerateGraph(String.Concat("digraph{", toGraph, "}"), Enums.GraphReturnType.Png);
+            // Alternatively you could save the image on the server as a file.
+            var graph = string.Format("data:image/jpg;base64,{0}", Convert.ToBase64String(output));
+            return graph;
         }
 
         private List<WorkPackageRouteTree> giveMeTheTree(int workPackageId, int procedureId)
