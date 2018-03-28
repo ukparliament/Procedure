@@ -88,7 +88,7 @@ namespace Procedure.Web.Controllers
             RouteItem[] filteredRouteItems = routes.Where(route => actualizedStepIds.Contains(route.FromStep.Id)).ToArray();
             // Or use LINQ .Aggregate()
 
-            string toGraph = "";
+            string toGraph = "graph [fontname = \"Calibri\"]; node[fontname = \"Calibri\"]; edge[fontname = \"Calibri\"];";
             foreach (RouteItem route in filteredRouteItems)
             {
                 string newRoute = "", styling = "";
