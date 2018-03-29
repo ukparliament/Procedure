@@ -112,10 +112,10 @@ namespace Procedure.Web.Controllers
                     toGraph += newRoute;
                 }
 
-                byte[] output = wrapper.GenerateGraph(String.Concat("digraph{", toGraph, "}"), Enums.GraphReturnType.Png);
+                byte[] output = wrapper.GenerateGraph(String.Concat("digraph{", toGraph, "}"), Enums.GraphReturnType.Plain);
                 // Alternatively you could save the image on the server as a file.
                 string graph = string.Format("data:image/png;base64,{0}", Convert.ToBase64String(output));
-                return File(output, "text/png");
+                return File(output, "text/plain");
             }
         }
 
