@@ -88,7 +88,7 @@ namespace Procedure.Web.Controllers
             RouteItem[] filteredRouteItems = routes.Where(route => actualizedStepIds.Contains(route.FromStep.Id)).ToArray();
             // Or use LINQ .Aggregate()
 
-            string toGraph = "graph [fontname = \"sans serif\"]; node[fontname = \"sans serif\"]; edge[fontname = \"sans serif\"];";
+            string toGraph = "graph [fontname = \"lato\"]; node[fontname = \"Arial\"]; edge[fontname = \"lato\"];";
             foreach (RouteItem route in filteredRouteItems)
             {
                 string newRoute = "", styling = "";
@@ -101,7 +101,7 @@ namespace Procedure.Web.Controllers
 
             byte[] output = wrapper.GenerateGraph(String.Concat("digraph{", toGraph, "}"), Enums.GraphReturnType.Png);
             // Alternatively you could save the image on the server as a file.
-            var graph = string.Format("data:image/jpg;base64,{0}", Convert.ToBase64String(output));
+            var graph = string.Format("data:image/png;base64,{0}", Convert.ToBase64String(output));
             return graph;
         }
 
