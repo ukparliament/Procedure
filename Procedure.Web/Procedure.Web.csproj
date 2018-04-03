@@ -194,7 +194,6 @@
     <Content Include="Views\Steps\Details.cshtml" />
     <Content Include="Views\Shared\BusinessItems.cshtml" />
     <Content Include="Views\Procedures\Tree.cshtml" />
-    <Content Include="Views\WorkPackages\Graph.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">

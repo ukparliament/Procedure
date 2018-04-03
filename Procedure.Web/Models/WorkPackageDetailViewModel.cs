@@ -6,6 +6,5 @@ namespace Procedure.Web.Models
     {
         public WorkPackageItem WorkPackage { get; set; }
         public List<WorkPackageRouteTree> Tree { get; set; }
-        public string Graph { get; set; }
     }
 }
