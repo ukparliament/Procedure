@@ -89,11 +89,23 @@ namespace Procedure.Web.Controllers
                 {
                     string newRoute = "", styling = "";
                     if (route.RouteKind.ToString().Equals("Causes")) { newRoute = String.Concat("\"", route.FromStep.Value, "\" -> \"", route.ToStep.Value, "\" [label = \"Causes\"]; "); }
-                    if (route.RouteKind.ToString().Equals("Allows")) { newRoute = String.Concat("\"", route.FromStep.Value, "\" -> \"", route.ToStep.Value, "\" [label = \"Allows\"];"); }
-                    if (route.RouteKind.ToString().Equals("Precludes")) { newRoute = String.Concat(" edge [color=red]; \"", route.FromStep.Value, "\" -> \"", route.ToStep.Value, "\" [label = \"Precludes\"]; edge [color=black];"); }
+                    if (route.RouteKind.ToString().Equals("Allows")) { newRoute = String.Concat("edge [style=dashed]; \"", route.FromStep.Value, "\" -> \"", route.ToStep.Value, "\" [label = \"Allows\"]; edge [style=solid];"); }
+                    if (route.RouteKind.ToString().Equals("Precludes")) { newRoute = String.Concat("edge [color=red]; \"", route.FromStep.Value, "\" -> \"", route.ToStep.Value, "\" [label = \"Precludes\"]; edge [color=black];"); }
                     if (actualizedStepIds.Contains(route.FromStep.Id)) { styling = String.Concat("\"", route.FromStep.Value, "\" [style=filled,color=\"gray\"];"); toGraph += styling; }
                     toGraph += newRoute;
                 }
+
+                // Add a legend
+                toGraph += "subgraph cluster_key {" +
+                    "label=\"Key\"; labeljust=\"l\" " +
+                    "k1[label=\"Actualised step\", style=filled, color=\"gray\"]; node [shape=plaintext];" +
+                "k2 [label=<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\"> " +
+                "<tr><td align=\"right\" port=\"i1\" > Allows </td></tr>" +
+                "<tr><td align=\"right\" port=\"i2\"> Causes </td></tr>" +
+                "<tr><td align=\"right\" port=\"i3\" > Precludes </td></tr> </table>>];" +
+                "k2e [label =<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\">" +
+                "<tr><td port=\"i1\" > &nbsp;</td></tr> <tr><td port=\"i2\"> &nbsp;</td></tr> <tr><td port=\"i3\"> &nbsp;</td></tr> </table>>];" +
+                 "k2:i1:e -> k2e:i1:w [style=dashed] k2:i2:e->k2e:i2:w k2:i3:e->k2e:i3:w[color = red] { rank = same; k2 k2e } {rank = source; k1}};";
 
                 byte[] output = wrapper.GenerateGraph(String.Concat("digraph{", toGraph, "}"), Enums.GraphReturnType.Svg);
                 // Alternatively you could save the image on the server as a file.
