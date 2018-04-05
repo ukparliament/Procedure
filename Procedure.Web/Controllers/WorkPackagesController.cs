@@ -81,11 +81,14 @@ namespace Procedure.Web.Controllers
                 }
                 JObject jsonRoute = (JObject)JsonConvert.DeserializeObject(routeResponse);
                 List<RouteItem> routes = ((JArray)jsonRoute.SelectToken("value")).ToObject<List<RouteItem>>();
-                RouteItem[] filteredRouteItems = routes.Where(route => actualizedStepIds.Contains(route.FromStep.Id)).ToArray();
-                // Or use LINQ .Aggregate()
+                RouteItem[] actualizedRouteItems = routes.Where(route => actualizedStepIds.Contains(route.FromStep.Id)).ToArray();
+                RouteItem[] lastActualizedRouteItems = actualizedRouteItems.Except(actualizedRouteItems.Where(route => actualizedStepIds.Contains(route.ToStep.Id) & actualizedStepIds.Contains(route.FromStep.Id))).ToArray();
+                RouteItem[] bothEndsActualizedRoutes = actualizedRouteItems.Where(route => actualizedStepIds.Contains(route.ToStep.Id) & actualizedStepIds.Contains(route.FromStep.Id) & (int)route.RouteKind!=3).ToArray();
+                int[] blackOutStepIds = bothEndsActualizedRoutes.Select(s => s.FromStep.Id).ToArray();
 
+                // Or use LINQ .Aggregate()
                 string toGraph = "graph [fontname = \"calibri\"]; node[fontname = \"calibri\"]; edge[fontname = \"calibri\"];";
-                foreach (RouteItem route in filteredRouteItems)
+                foreach (RouteItem route in actualizedRouteItems)
                 {
                     string newRoute = "", styling = "";
                     if (route.RouteKind.ToString().Equals("Causes")) { newRoute = String.Concat("\"", route.FromStep.Value, "\" -> \"", route.ToStep.Value, "\" [label = \"Causes\"]; "); }
@@ -95,17 +98,23 @@ namespace Procedure.Web.Controllers
                     toGraph += newRoute;
                 }
 
+                foreach (RouteItem route in lastActualizedRouteItems)
+                {
+                    if (!blackOutStepIds.Contains(route.FromStep.Id)) { toGraph += String.Concat("\"", route.ToStep.Value, "\" [style=filled,peripheries=2,color=\"orange\"];"); }
+                }
+
                 // Add a legend
                 toGraph += "subgraph cluster_key {" +
                     "label=\"Key\"; labeljust=\"l\" " +
-                    "k1[label=\"Actualised step\", style=filled, color=\"gray\"]; node [shape=plaintext];" +
-                "k2 [label=<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\"> " +
+                    "k1[label=\"Actualised step\", style=filled, color=\"gray\"]" +
+                    "k2[label=\"Possible next step\", style=filled, color=\"orange\", peripheries=2]; node [shape=plaintext];" +
+                "k3 [label=<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\"> " +
                 "<tr><td align=\"right\" port=\"i1\" > Allows </td></tr>" +
                 "<tr><td align=\"right\" port=\"i2\"> Causes </td></tr>" +
                 "<tr><td align=\"right\" port=\"i3\" > Precludes </td></tr> </table>>];" +
-                "k2e [label =<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\">" +
+                "k3e [label =<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\">" +
                 "<tr><td port=\"i1\" > &nbsp;</td></tr> <tr><td port=\"i2\"> &nbsp;</td></tr> <tr><td port=\"i3\"> &nbsp;</td></tr> </table>>];" +
-                 "k2:i1:e -> k2e:i1:w [style=dashed] k2:i2:e->k2e:i2:w k2:i3:e->k2e:i3:w[color = red] { rank = same; k2 k2e } {rank = source; k1}};";
+                 "k3:i1:e -> k3e:i1:w [style=dashed] k3:i2:e->k3e:i2:w k3:i3:e->k3e:i3:w[color = red] { rank = same; k3 k3e } {rank = source; k1 k2}};";
 
                 byte[] output = wrapper.GenerateGraph(String.Concat("digraph{", toGraph, "}"), Enums.GraphReturnType.Svg);
                 // Alternatively you could save the image on the server as a file.
