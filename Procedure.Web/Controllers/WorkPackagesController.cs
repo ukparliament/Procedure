@@ -100,7 +100,7 @@ namespace Procedure.Web.Controllers
 
             foreach (RouteItem route in lastActualizedRouteItems)
             {
-                if (!blackOutStepIds.Contains(route.FromStep.Id)) { toGraph += String.Concat("\"", route.ToStep.Value, "\" [style=filled,peripheries=2,color=\"orange\"];"); }
+                if (!blackOutStepIds.Contains(route.FromStep.Id) & (int)route.RouteKind!=3) { toGraph += String.Concat("\"", route.ToStep.Value, "\" [style=filled,peripheries=2,color=\"orange\"];"); }
             }
 
             // Add a legend
