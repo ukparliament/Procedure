@@ -1,4 +1,12 @@
-﻿details {
+﻿body {
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.hero h1:after {
+    height: 0px;
+}
+
+details {
     margin-left: 15px;
 }
 
