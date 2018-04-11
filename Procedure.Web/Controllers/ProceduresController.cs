@@ -41,8 +41,34 @@ namespace Procedure.Web.Controllers
         [Route("{id:int}/graph")]
         public ActionResult Graph(int id)
         {
-            int procedureId = id;
+            var getStartProcessQuery = new GetStartProcessQuery();
+            var getProcessStartInfoQuery = new GetProcessStartInfoQuery();
+            var registerLayoutPluginCommand = new RegisterLayoutPluginCommand(getProcessStartInfoQuery, getStartProcessQuery);
+            var wrapper = new GraphGeneration(getStartProcessQuery,
+                                              getProcessStartInfoQuery,
+                                              registerLayoutPluginCommand);
 
+            byte[] output = wrapper.GenerateGraph(GiveMeDotString(id), Enums.GraphReturnType.Svg);
+            string graph = string.Format("data:image/svg+xml;base64,{0}", Convert.ToBase64String(output));
+            return File(output, "image/svg+xml");
+        }
+
+        [Route("{id:int}/graph.dot")]
+        public ActionResult GraphDot(int id)
+        {
+            var getStartProcessQuery = new GetStartProcessQuery();
+            var getProcessStartInfoQuery = new GetProcessStartInfoQuery();
+            var registerLayoutPluginCommand = new RegisterLayoutPluginCommand(getProcessStartInfoQuery, getStartProcessQuery);
+            var wrapper = new GraphGeneration(getStartProcessQuery,
+                                              getProcessStartInfoQuery,
+                                              registerLayoutPluginCommand);
+
+            byte[] output = wrapper.GenerateGraph(GiveMeDotString(id), Enums.GraphReturnType.Plain);
+            return File(output, "text/plain");
+        }
+
+        private string GiveMeDotString(int procedureId)
+        {
             var getStartProcessQuery = new GetStartProcessQuery();
             var getProcessStartInfoQuery = new GetProcessStartInfoQuery();
             var registerLayoutPluginCommand = new RegisterLayoutPluginCommand(getProcessStartInfoQuery, getStartProcessQuery);
@@ -80,9 +106,7 @@ namespace Procedure.Web.Controllers
                 "<tr><td port=\"i1\" > &nbsp;</td></tr> <tr><td port=\"i2\"> &nbsp;</td></tr> <tr><td port=\"i3\"> &nbsp;</td></tr> </table>>];" +
                 "k3:i1:e -> k3e:i1:w [style=dashed] k3:i2:e->k3e:i2:w k3:i3:e->k3e:i3:w[color = red] { rank = same; k3 k3e k1 } };";
 
-            byte[] output = wrapper.GenerateGraph(String.Concat("digraph{", toGraph, "}"), Enums.GraphReturnType.Svg);
-            string graph = string.Format("data:image/svg+xml;base64,{0}", Convert.ToBase64String(output));
-            return File(output, "image/svg+xml");
+            return String.Concat("digraph{", toGraph, "}");
         }
 
     }
