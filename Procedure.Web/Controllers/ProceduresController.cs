@@ -69,13 +69,6 @@ namespace Procedure.Web.Controllers
 
         private string GiveMeDotString(int procedureId)
         {
-            var getStartProcessQuery = new GetStartProcessQuery();
-            var getProcessStartInfoQuery = new GetProcessStartInfoQuery();
-            var registerLayoutPluginCommand = new RegisterLayoutPluginCommand(getProcessStartInfoQuery, getStartProcessQuery);
-            var wrapper = new GraphGeneration(getStartProcessQuery,
-                                              getProcessStartInfoQuery,
-                                              registerLayoutPluginCommand);
-
             string routeResponse = null;
             using (HttpResponseMessage responseMessage = GetList(ProcedureRouteListId, filter: $"Procedure/ID eq {procedureId}"))
             {
