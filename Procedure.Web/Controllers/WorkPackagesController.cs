@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Web.Mvc;
 
 namespace Procedure.Web.Controllers
@@ -106,24 +107,23 @@ namespace Procedure.Web.Controllers
             int[] blackOutStepIds = bothEndsActualizedRoutes.Select(s => s.FromStep.Id).ToArray();
 
             // Or use LINQ .Aggregate()
-            string toGraph = "graph [fontname = \"calibri\"]; node[fontname = \"calibri\"]; edge[fontname = \"calibri\"];";
+            StringBuilder builder = new StringBuilder("graph [fontname = \"calibri\"]; node[fontname = \"calibri\"]; edge[fontname = \"calibri\"];");
+
             foreach (RouteItem route in actualizedRouteItems)
             {
-                string newRoute = "", styling = "";
-                if (route.RouteKind.ToString().Equals("Causes")) { newRoute = String.Concat("\"", route.FromStep.Value, "\" -> \"", route.ToStep.Value, "\" [label = \"Causes\"]; "); }
-                if (route.RouteKind.ToString().Equals("Allows")) { newRoute = String.Concat("edge [style=dashed]; \"", route.FromStep.Value, "\" -> \"", route.ToStep.Value, "\" [label = \"Allows\"]; edge [style=solid];"); }
-                if (route.RouteKind.ToString().Equals("Precludes")) { newRoute = String.Concat("edge [color=red]; \"", route.FromStep.Value, "\" -> \"", route.ToStep.Value, "\" [label = \"Precludes\"]; edge [color=black];"); }
-                if (actualizedStepIds.Contains(route.FromStep.Id)) { styling = String.Concat("\"", route.FromStep.Value, "\" [style=filled,color=\"gray\"];"); toGraph += styling; }
-                toGraph += newRoute;
+                if ((int)route.RouteKind == 1) { builder.Append("\"" + route.FromStep.Value + "\" -> \"" + route.ToStep.Value + "\" [label = \"Causes\"]; "); }
+                if ((int)route.RouteKind == 2) { builder.Append("edge [style=dashed]; \"" + route.FromStep.Value + "\" -> \"" + route.ToStep.Value + "\" [label = \"Allows\"]; edge [style=solid];"); }
+                if ((int)route.RouteKind == 3) { builder.Append("edge [color=red]; \"" + route.FromStep.Value + "\" -> \"" + route.ToStep.Value + "\" [label = \"Precludes\"]; edge [color=black];"); }
+                if (actualizedStepIds.Contains(route.FromStep.Id)) { builder.Append("\"" + route.FromStep.Value + "\" [style=filled,color=\"gray\"];"); }
             }
 
             foreach (RouteItem route in lastActualizedRouteItems)
             {
-                if (!blackOutStepIds.Contains(route.FromStep.Id) & (int)route.RouteKind != 3) { toGraph += String.Concat("\"", route.ToStep.Value, "\" [style=filled,peripheries=2,color=\"orange\"];"); }
+                if (!blackOutStepIds.Contains(route.FromStep.Id) & (int)route.RouteKind != 3) { builder.Append("\"" + route.ToStep.Value + "\" [style=filled,peripheries=2,color=\"orange\"];"); }
             }
 
             // Add a legend
-            toGraph += "subgraph cluster_key {" +
+            builder.Append("subgraph cluster_key {" +
                 "label=\"Key\"; labeljust=\"l\" " +
                 "k1[label=\"Actualised step\", style=filled, color=\"gray\"]" +
                 "k2[label=\"Possible next step\", style=filled, color=\"orange\", peripheries=2]; node [shape=plaintext];" +
@@ -133,9 +133,12 @@ namespace Procedure.Web.Controllers
             "<tr><td align=\"right\" port=\"i3\" > Precludes </td></tr> </table>>];" +
             "k3e [label =<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\">" +
             "<tr><td port=\"i1\" > &nbsp;</td></tr> <tr><td port=\"i2\"> &nbsp;</td></tr> <tr><td port=\"i3\"> &nbsp;</td></tr> </table>>];" +
-             "k3:i1:e -> k3e:i1:w [style=dashed] k3:i2:e->k3e:i2:w k3:i3:e->k3e:i3:w[color = red] { rank = same; k3 k3e } {rank = source; k1 k2}};";
+             "k3:i1:e -> k3e:i1:w [style=dashed] k3:i2:e->k3e:i2:w k3:i3:e->k3e:i3:w[color = red] { rank = same; k3 k3e } {rank = source; k1 k2}};");
 
-            return String.Concat("digraph{", toGraph, "}");
+            builder.Insert(0, "digraph{");
+            builder.Append("}");
+
+            return builder.ToString();
         }
 
         private List<WorkPackageRouteTree> giveMeTheTree(int workPackageId, int procedureId)
