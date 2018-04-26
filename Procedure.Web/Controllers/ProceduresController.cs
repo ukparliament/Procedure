@@ -9,6 +9,11 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Web.Mvc;
+using Parliament.Model;
+using VDS.RDF;
+using System.Xml.Linq;
+using System.Linq;
+using Parliament.Rdf.Serialization;
 
 namespace Procedure.Web.Controllers
 {
@@ -33,7 +38,6 @@ namespace Procedure.Web.Controllers
                 procedureResponse = responseMessage.Content.ReadAsStringAsync().Result;
             }
             viewModel.Procedure = ((JObject)JsonConvert.DeserializeObject(procedureResponse)).ToObject<ProcedureItem>();
-
             viewModel.Tree = GenerateProcedureTree(id);
 
             return View(viewModel);
@@ -103,6 +107,49 @@ namespace Procedure.Web.Controllers
 
             return builder.ToString();
         }
+
+        [Route("{id:int}/graphml")]
+        public ActionResult GraphML(int id)
+        {
+            string routeResponse = null;
+            using (HttpResponseMessage responseMessage = GetList(ProcedureRouteListId, filter: $"Procedure/ID eq {id}"))
+            {
+                routeResponse = responseMessage.Content.ReadAsStringAsync().Result;
+            }
+            JObject jsonRoute = (JObject)JsonConvert.DeserializeObject(routeResponse);
+            List<RouteItem> routes = ((JArray)jsonRoute.SelectToken("value")).ToObject<List<RouteItem>>();
+
+            IEnumerable<IProcedureRoute> IRoutes = routes.Select(r => r.GiveMeMappedObject());
+
+            RdfSerializer serializer = new RdfSerializer();
+            IGraph graph = serializer.Serialize(IRoutes, typeof(IProcedureRoute).Assembly.GetTypes());
+
+            // Nodes 
+            IEnumerable<Triple> stepTriples = graph.GetTriplesWithObject(new System.Uri("https://id.parliament.uk/schema/ProcedureStep"));
+            // Edges
+            IEnumerable<Triple> routeTriples = graph.GetTriplesWithObject(new System.Uri("https://id.parliament.uk/schema/ProcedureRoute"));
+
+            // http://graphml.graphdrawing.org/primer/graphml-primer.html
+
+            XNamespace ns = "http://graphml.graphdrawing.org/xmlns";
+
+            XDocument doc = new XDocument(
+                new XDeclaration("1.0", "UTF-8", "yes"),
+                new XElement(ns + "graphml",
+                    new XElement("graph",
+                        new XAttribute("id", "G"), new XAttribute("edgedefault", "directed"),
+                        stepTriples.Select(t => new XElement("node", new XAttribute("id", t.Subject.GetHashCode()), new XElement("data", new XText(t.Subject.ToString()))))
+                        // graph.Nodes.Select(n => new XElement("node", new XAttribute("id", n.GetHashCode())))
+                    )));
+
+            // HttpResponseMessage Response = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
+
+            return Content(doc.ToString(), "application/xml");
+
+        }
+
+
+
 
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Parliament.Model;
 using System;
 
 namespace Procedure.Web.Models
@@ -22,6 +23,31 @@ namespace Procedure.Web.Models
             {
                 return (RouteType)Enum.Parse(typeof(RouteType), RouteTypeItem?.Value ?? RouteType.None.ToString());
             }
+        }
+
+        public string TripleStoreId { get; set; }
+
+        [JsonProperty(PropertyName = "FromStep_x003a_TripleStoreId")]
+        public SharepointLookupItem FromStepTripleStoreIdJsonObj { get; set; }
+
+        [JsonProperty(PropertyName = "ToStep_x003a_TripleStoreId")]
+        public SharepointLookupItem ToStepTripleStoreIdJsonObj { get; set; }
+
+        public SharepointLookupItem Procedure { get; set; }
+
+
+        [JsonProperty(PropertyName = "Procedure_x003a_TripleStoreId")]
+        public SharepointLookupItem ProcedureTripleStoreIdJsonObj { get; set; }
+
+        public IProcedureRoute GiveMeMappedObject()
+        {
+            IProcedureRoute result = new Parliament.Model.ProcedureRoute();
+            result.Id = new System.Uri($"https://id.parliament.uk/{TripleStoreId}");
+            result.ProcedureRouteIsToProcedureStep = new IProcedureStep[] { ToStep.ToSharepointItem<StepItem>().GiveMeMappedObject(ToStepTripleStoreIdJsonObj.Value)};
+            result.ProcedureRouteIsFromProcedureStep = new IProcedureStep[] { FromStep.ToSharepointItem<StepItem>().GiveMeMappedObject(FromStepTripleStoreIdJsonObj.Value)};
+            // result.ProcedureRouteHasProcedure = new IProcedure[] { Procedure.ToSharepointItem<ProcedureItem>().GiveMeMappedObject(ProcedureTripleStoreIdJsonObj.Value)};
+
+            return result;
         }
 
     }
