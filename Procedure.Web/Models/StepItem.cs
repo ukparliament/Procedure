@@ -6,6 +6,8 @@ namespace Procedure.Web.Models
     {
         public string TripleStoreId { get; set; }
 
+        public string Description { get; set; }
+
         public IProcedureStep GiveMeMappedObject(string tripleStoreId)
         {
             string id = tripleStoreId ?? TripleStoreId;

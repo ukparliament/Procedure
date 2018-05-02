@@ -37,7 +37,7 @@ namespace Procedure.Web.Controllers
             viewModel.Routes = ((JArray)jsonRoute.SelectToken("value")).ToObject<List<RouteItem>>();
 
             string businessItemResponse = null;
-            using (HttpResponseMessage responseMessage = GetList(ProcedureBusinessItemListId, filter: $"Actualises/ID eq {id}"))
+            using (HttpResponseMessage responseMessage = GetList(ProcedureBusinessItemListId, filter: $"ActualisesProcedureStep/ID eq {id}"))
             {
                 businessItemResponse = responseMessage.Content.ReadAsStringAsync().Result;
             }

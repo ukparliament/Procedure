@@ -5,6 +5,10 @@
 <section>
     <div class="container">
         <h2>@Model.Step.Title</h2>
+        @if (!String.IsNullOrEmpty(Model.Step.Description))
+        {
+            <p>Description: @Model.Step.Description</p>
+        }
 
         <div class="block--border__bottom">
             @if (Model.Routes.Any())
@@ -18,7 +22,7 @@
                             <li>@route.FromStep.Value @route.RouteKind @route.ToStep.Value</li>
                         }
                         else
-                        if (route.FromStep.Id == Model.Step.Id)
+                if (route.FromStep.Id == Model.Step.Id)
                         {
                             <li>@route.FromStep.Value @route.RouteKind @Html.ActionLink(route.ToStep.Value, "Details", "Steps", new { id = route.ToStep.Id }, new { })</li>
                         }
