@@ -41,7 +41,7 @@ namespace Procedure.Web.Models
 
         public IProcedureRoute GiveMeMappedObject()
         {
-            IProcedureRoute result = new Parliament.Model.ProcedureRoute();
+            IProcedureRoute result = new ProcedureRoute();
             result.Id = new System.Uri($"https://id.parliament.uk/{TripleStoreId}");
             result.ProcedureRouteIsToProcedureStep = new IProcedureStep[] { ToStep.ToSharepointItem<StepItem>().GiveMeMappedObject(ToStepTripleStoreIdJsonObj.Value)};
             result.ProcedureRouteIsFromProcedureStep = new IProcedureStep[] { FromStep.ToSharepointItem<StepItem>().GiveMeMappedObject(FromStepTripleStoreIdJsonObj.Value)};

@@ -1,21 +1,30 @@
-﻿namespace Procedure.Web.Models
+﻿using Newtonsoft.Json;
+using Parliament.Model;
+
+namespace Procedure.Web.Models
 {
-    // * Commented code for when work package items no longer have Titles and cannot inherit from BaseSharepointItem class
-    
-        // public class WorkpackageItem
+
     public class WorkPackageItem : BaseSharepointItem
     {
         public SharepointLookupItem SubjectTo { get; set; }
 
-        // public string TripleStoreId { get; set;} 
-        // public SharepointLookupItem WorkPackageableThing { get; set;}
+        [JsonProperty(PropertyName = "SubjectTo_x003a_TripleStoreId")]
+        public SharepointLookupItem SubjectToTripleStoreIdJsonObj { get; set; }
 
-        //public IWorkPackage GiveMeMappedObject()
-        //{
-        //    IWorkPackage result = new Parliament.Model.WorkPackage();
-        //    result.Id = new System.Uri($"https://id.parliament.uk/{TripleStoreId}");
-           
-        //    return result;
-        //}
+        [JsonProperty(PropertyName = "OData__x0076_dy9")]
+        public string TripleStoreId { get; set; }
+
+        public SharepointLookupItem WorkPackagableThingType { get; set; }
+
+        // Note Title is property of WorkPackageableThing instead of WorkPackage  
+        public IWorkPackage GiveMeMappedObject(string tripleStoreId)
+        {
+            string id = tripleStoreId ?? TripleStoreId;
+            IWorkPackage result = new WorkPackage();
+            result.Id = new System.Uri($"https://id.parliament.uk/{id}");
+            result.WorkPackageHasProcedure = SubjectTo.ToSharepointItem<ProcedureItem>().GiveMeMappedObject(SubjectToTripleStoreIdJsonObj.Value);
+
+            return result;
+        }
     }
 }
