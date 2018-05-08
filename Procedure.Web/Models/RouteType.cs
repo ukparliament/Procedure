@@ -8,6 +8,7 @@ namespace Procedure.Web.Models
         None = 0,
         Causes = 1,
         Allows = 2,
-        Precludes = 3
+        Precludes = 3,
+        Requires = 4
     }
 }

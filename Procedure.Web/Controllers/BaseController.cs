@@ -67,6 +67,7 @@ namespace Procedure.Web.Controllers
             }
             JObject jsonRoute = (JObject)JsonConvert.DeserializeObject(routeResponse);
             List<RouteItem> routes = ((JArray)jsonRoute.SelectToken("value")).ToObject<List<RouteItem>>();
+            routes = routes.Where(r => r.RouteKind != RouteType.Requires).ToList();
             RouteItem[] filteredRouteItems = routes.Where(to => to.FromStep.Id != to.ToStep.Id).ToArray();
             int[] entrySteps = filteredRouteItems
                 .Where(r => filteredRouteItems.Any(to => to.ToStep.Id == r.FromStep.Id) == false)
