@@ -9,6 +9,13 @@
         {
             <p>Description: @Model.Step.Description</p>
         }
+        @if (Model.Step.House.Any())
+        {
+            foreach (SharepointLookupItem House in Model.Step.House)
+            {
+                <p>@House.Value</p>
+            }
+        }
 
         <div class="block--border__bottom">
             @if (Model.Routes.Any())
