@@ -97,7 +97,7 @@ namespace Procedure.Web.Controllers
                     builder.Append($"\"{route.FromStep.Value.RemoveQuotesAndTrim()}\" -> \"{route.ToStep.Value.RemoveQuotesAndTrim()}\" [label = \"Causes\"]; ");
                 }
                 if (route.RouteKind == RouteType.Allows) {
-                    builder.Append($"edge [style=red]; \"{route.FromStep.Value.RemoveQuotesAndTrim()}\" -> \"{route.ToStep.Value.RemoveQuotesAndTrim()}\" [label = \"Allows\"]; edge [style=solid];");
+                    builder.Append($"edge [color=red]; \"{route.FromStep.Value.RemoveQuotesAndTrim()}\" -> \"{route.ToStep.Value.RemoveQuotesAndTrim()}\" [label = \"Allows\"]; edge [color=black];");
                 }
                 if (route.RouteKind == RouteType.Precludes) { 
                     builder.Append($"edge [color=blue]; \"{route.FromStep.Value.RemoveQuotesAndTrim()}\" -> \"{route.ToStep.Value.RemoveQuotesAndTrim()}\" [label = \"Precludes\"]; edge [color=black];");

@@ -3,6 +3,7 @@ using GraphVizWrapper.Commands;
 using GraphVizWrapper.Queries;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Procedure.Web.Extensions;
 using Procedure.Web.Models;
 using System;
 using System.Collections.Generic;
@@ -103,7 +104,7 @@ namespace Procedure.Web.Controllers
             List<RouteItem> routes = ((JArray)jsonRoute.SelectToken("value")).ToObject<List<RouteItem>>();
             List<RouteItem> actualizedRouteItems = routes.Where(route => actualizedStepIds.Contains(route.FromStep.Id)).ToList();
             List<RouteItem> lastActualizedRouteItems = actualizedRouteItems.Except(actualizedRouteItems.Where(route => actualizedStepIds.Contains(route.ToStep.Id) & actualizedStepIds.Contains(route.FromStep.Id))).ToList();
-            List<RouteItem> bothEndsActualizedRoutes = actualizedRouteItems.Where(route => actualizedStepIds.Contains(route.ToStep.Id) & actualizedStepIds.Contains(route.FromStep.Id) & (int)route.RouteKind != 3).ToList();
+            List<RouteItem> bothEndsActualizedRoutes = actualizedRouteItems.Where(route => actualizedStepIds.Contains(route.ToStep.Id) & actualizedStepIds.Contains(route.FromStep.Id) & route.RouteKind != RouteType.Precludes).ToList();
             int[] blackOutStepIds = bothEndsActualizedRoutes.Select(s => s.FromStep.Id).ToArray();
 
             // Or use LINQ .Aggregate()
@@ -111,15 +112,29 @@ namespace Procedure.Web.Controllers
 
             foreach (RouteItem route in actualizedRouteItems)
             {
-                if ((int)route.RouteKind == 1) { builder.Append("\"" + route.FromStep.Value + "\" -> \"" + route.ToStep.Value + "\" [label = \"Causes\"]; "); }
-                if ((int)route.RouteKind == 2) { builder.Append("edge [style=dashed]; \"" + route.FromStep.Value + "\" -> \"" + route.ToStep.Value + "\" [label = \"Allows\"]; edge [style=solid];"); }
-                if ((int)route.RouteKind == 3) { builder.Append("edge [color=red]; \"" + route.FromStep.Value + "\" -> \"" + route.ToStep.Value + "\" [label = \"Precludes\"]; edge [color=black];"); }
-                if (actualizedStepIds.Contains(route.FromStep.Id)) { builder.Append("\"" + route.FromStep.Value + "\" [style=filled,color=\"gray\"];"); }
+                if (route.RouteKind == RouteType.Causes) {
+                    builder.Append($"\"{route.FromStep.Value.RemoveQuotesAndTrim()}\" -> \"{route.ToStep.Value.RemoveQuotesAndTrim()}\" [label = \"Causes\"]; ");
+                }
+                if (route.RouteKind == RouteType.Allows) {
+                    builder.Append($"edge [color=red]; \"{route.FromStep.Value.RemoveQuotesAndTrim()}\" -> \"{route.ToStep.Value.RemoveQuotesAndTrim()}\" [label = \"Allows\"]; edge [color=black];");
+                }
+                if (route.RouteKind == RouteType.Precludes) {
+                    builder.Append($"edge [color=blue]; \"{route.FromStep.Value.RemoveQuotesAndTrim()}\" -> \"{route.ToStep.Value.RemoveQuotesAndTrim()}\" [label = \"Precludes\"]; edge [color=black];");
+                }
+                if (route.RouteKind == RouteType.Requires)
+                {
+                    builder.Append($"edge [color=yellow]; \"{route.FromStep.Value.RemoveQuotesAndTrim()}\" -> \"{route.ToStep.Value.RemoveQuotesAndTrim()}\" [label = \"Requires\"]; edge [color=black];");
+                }
+                if (actualizedStepIds.Contains(route.FromStep.Id)) {
+                    builder.Append($"\"{route.FromStep.Value.RemoveQuotesAndTrim()}\" [style=filled,color=\"gray\"];");
+                }
             }
 
             foreach (RouteItem route in lastActualizedRouteItems)
             {
-                if (!blackOutStepIds.Contains(route.FromStep.Id) & (int)route.RouteKind != 3) { builder.Append("\"" + route.ToStep.Value + "\" [style=filled,peripheries=2,color=\"orange\"];"); }
+                if (!blackOutStepIds.Contains(route.FromStep.Id) & !new[]{RouteType.Precludes, RouteType.Requires}.Contains(route.RouteKind) ) {
+                    builder.Append($"\"{route.ToStep.Value.RemoveQuotesAndTrim()}\" [style=filled,peripheries=2,color=\"orange\"];");
+                }
             }
 
             // Add a legend
@@ -128,12 +143,13 @@ namespace Procedure.Web.Controllers
                 "k1[label=\"Actualised step\", style=filled, color=\"gray\"]" +
                 "k2[label=\"Possible next step\", style=filled, color=\"orange\", peripheries=2]; node [shape=plaintext];" +
             "k3 [label=<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\"> " +
-            "<tr><td align=\"right\" port=\"i1\" > Allows </td></tr>" +
-            "<tr><td align=\"right\" port=\"i2\"> Causes </td></tr>" +
-            "<tr><td align=\"right\" port=\"i3\" > Precludes </td></tr> </table>>];" +
+            "<tr><td align=\"right\" port=\"i1\" > Causes </td></tr>" +
+            "<tr><td align=\"right\" port=\"i2\"> Allows </td></tr>" +
+            "<tr><td align=\"right\" port=\"i3\" > Precludes </td></tr>" +
+            "<tr><td align=\"right\" port=\"i4\" > Requires </td></tr> </table>>];" +
             "k3e [label =<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\">" +
-            "<tr><td port=\"i1\" > &nbsp;</td></tr> <tr><td port=\"i2\"> &nbsp;</td></tr> <tr><td port=\"i3\"> &nbsp;</td></tr> </table>>];" +
-             "k3:i1:e -> k3e:i1:w [style=dashed] k3:i2:e->k3e:i2:w k3:i3:e->k3e:i3:w[color = red] { rank = same; k3 k3e } {rank = source; k1 k2}};");
+            "<tr><td port=\"i1\" > &nbsp;</td></tr> <tr><td port=\"i2\"> &nbsp;</td></tr> <tr><td port=\"i3\"> &nbsp;</td></tr> <tr><td port=\"i4\"> &nbsp;</td></tr> </table>>];" +
+             "k3:i1:e->k3e:i1:w k3:i2:e->k3e:i2:w [color=red] k3:i3:e->k3e:i3:w [color = blue] k3:i4:e->k3e:i4:w [color = yellow] { rank = same; k3 k3e } {rank = source; k1 k2}};");
 
             builder.Insert(0, "digraph{");
             builder.Append("}");
