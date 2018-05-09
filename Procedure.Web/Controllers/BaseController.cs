@@ -67,7 +67,6 @@ namespace Procedure.Web.Controllers
             }
             JObject jsonRoute = (JObject)JsonConvert.DeserializeObject(routeResponse);
             List<RouteItem> routes = ((JArray)jsonRoute.SelectToken("value")).ToObject<List<RouteItem>>();
-            routes = routes.Where(r => r.RouteKind != RouteType.Requires).ToList();
             RouteItem[] filteredRouteItems = routes.Where(to => to.FromStep.Id != to.ToStep.Id).ToArray();
             int[] entrySteps = filteredRouteItems
                 .Where(r => filteredRouteItems.Any(to => to.ToStep.Id == r.FromStep.Id) == false)
@@ -78,6 +77,7 @@ namespace Procedure.Web.Controllers
                 .Select(s => routes.FirstOrDefault(r => r.FromStep.Id == s))
                 .ToArray();
             List<ProcedureRouteTree> tree = new List<ProcedureRouteTree>();
+            List<int> parents = new List<int>();
             foreach (RouteItem route in entryRoutes)
             {
                 RouteItem selfReferenced = routes
@@ -87,16 +87,17 @@ namespace Procedure.Web.Controllers
                     SelfReferencedRouteKind = selfReferenced?.RouteKind ?? RouteType.None,
                     RouteKind = RouteType.None,
                     Step = route.FromStep,
-                    ChildrenRoutes = giveMeChildrenRoutes(route.FromStep.Id, routes)
+                    ChildrenRoutes = giveMeChildrenRoutes(route.FromStep.Id, routes, ref parents)
                 });
             }
 
             return tree;
         }
 
-        private List<ProcedureRouteTree> giveMeChildrenRoutes(int parentStepId, List<RouteItem> allRoutes)
+        private List<ProcedureRouteTree> giveMeChildrenRoutes(int parentStepId, List<RouteItem> allRoutes, ref List<int> parents)
         {
             List<ProcedureRouteTree> result = new List<ProcedureRouteTree>();
+            parents.Add(parentStepId);
             RouteItem[] children = allRoutes.Where(r => r.FromStep.Id == parentStepId).ToArray();
             foreach (RouteItem route in children)
             {
@@ -109,7 +110,7 @@ namespace Procedure.Web.Controllers
                         SelfReferencedRouteKind = selfReferenced?.RouteKind ?? RouteType.None,
                         RouteKind = route.RouteKind,
                         Step = route.ToStep,
-                        ChildrenRoutes = giveMeChildrenRoutes(route.ToStep.Id, allRoutes)
+                        ChildrenRoutes = parents.Contains(route.ToStep.Id)?new List<ProcedureRouteTree>(): giveMeChildrenRoutes(route.ToStep.Id, allRoutes, ref parents)
                     });
                 }
             }
