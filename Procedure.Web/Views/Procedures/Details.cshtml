@@ -4,12 +4,7 @@
 <section>
     <div class="container">
         <h2>@Model.Procedure.Title</h2>
-        @Html.ActionLink("See Graph", "Graph", "Procedures", new { id = Model.Procedure.Id }, new { @class = "btn--primary" })
-        <p>
-            Available formats:
-            @Html.ActionLink("DOT (.gv)", "GraphDot", "Procedures", new { id = Model.Procedure.Id }, new {  }),
-            @Html.ActionLink("GraphML (.graphml)", "GraphML", "Procedures", new { id = Model.Procedure.Id }, new {  })
-        </p>
+        @Html.ActionLink("See Graph", "GraphViz", "Procedures", new { id = Model.Procedure.Id }, new { @class = "btn--primary" })
         @{
             Html.RenderPartial("Tree", Model.Tree);
         }

@@ -65,19 +65,13 @@ namespace Procedure.Web.Controllers
             return File(output, "image/svg+xml");
         }
 
-        [Route("{id:int}/graphtest")]
-        public ActionResult GraphTest(int id)
+        [Route("{id:int}/graphviz")]
+        public ActionResult GraphViz(int id)
         {
-            var getStartProcessQuery = new GetStartProcessQuery();
-            var getProcessStartInfoQuery = new GetProcessStartInfoQuery();
-            var registerLayoutPluginCommand = new RegisterLayoutPluginCommand(getProcessStartInfoQuery, getStartProcessQuery);
-            var wrapper = new GraphGeneration(getStartProcessQuery,
-                                              getProcessStartInfoQuery,
-                                              registerLayoutPluginCommand);
+            GraphVizViewModel viewmodel = new GraphVizViewModel();
+            viewmodel.DotString = GiveMeDotString(id);
 
-            byte[] output = wrapper.GenerateGraph(GiveMeDotString(id), Enums.GraphReturnType.Png);
-            string graph = string.Format("data:image/png;base64,{0}", Convert.ToBase64String(output));
-            return File(output, "image/png");
+            return View(viewmodel);
         }
 
         // Return graph in DOT string
@@ -105,20 +99,20 @@ namespace Procedure.Web.Controllers
             JObject jsonRoute = (JObject)JsonConvert.DeserializeObject(routeResponse);
             List<RouteItem> routes = ((JArray)jsonRoute.SelectToken("value")).ToObject<List<RouteItem>>();
 
-            StringBuilder builder = new StringBuilder("graph [fontname = \"calibri\"]; node[fontname = \"calibri\"]; edge[fontname = \"calibri\"];");
+            StringBuilder builder = new StringBuilder("graph[fontname=\"calibri\"];node[fontname=\"calibri\"];edge[fontname=\"calibri\"];");
             foreach (RouteItem route in routes)
             {
                 if (route.RouteKind == RouteType.Causes) {
-                    builder.Append($"\"{route.FromStep.Value.RemoveQuotesAndTrim()}\" -> \"{route.ToStep.Value.RemoveQuotesAndTrim()}\" [label = \"Causes\"]; ");
+                    builder.Append($"\"{route.FromStep.Value.RemoveQuotesAndTrim()}\"->\"{route.ToStep.Value.RemoveQuotesAndTrim()}\"[label=\"Causes\"]; ");
                 }
                 if (route.RouteKind == RouteType.Allows) {
-                    builder.Append($"edge [color=red]; \"{route.FromStep.Value.RemoveQuotesAndTrim()}\" -> \"{route.ToStep.Value.RemoveQuotesAndTrim()}\" [label = \"Allows\"]; edge [color=black];");
+                    builder.Append($"edge [color=red];\"{route.FromStep.Value.RemoveQuotesAndTrim()}\"->\"{route.ToStep.Value.RemoveQuotesAndTrim()}\"[label=\"Allows\"];edge[color=black];");
                 }
                 if (route.RouteKind == RouteType.Precludes) { 
-                    builder.Append($"edge [color=blue]; \"{route.FromStep.Value.RemoveQuotesAndTrim()}\" -> \"{route.ToStep.Value.RemoveQuotesAndTrim()}\" [label = \"Precludes\"]; edge [color=black];");
+                    builder.Append($"edge [color=blue];\"{route.FromStep.Value.RemoveQuotesAndTrim()}\"->\"{route.ToStep.Value.RemoveQuotesAndTrim()}\"[label=\"Precludes\"];edge[color=black];");
                 }
                 if (route.RouteKind == RouteType.Requires) {
-                    builder.Append($"edge [color=yellow]; \"{route.FromStep.Value.RemoveQuotesAndTrim()}\" -> \"{route.ToStep.Value.RemoveQuotesAndTrim()}\" [label = \"Requires\"]; edge [color=black];");
+                    builder.Append($"edge [color=yellow];\"{route.FromStep.Value.RemoveQuotesAndTrim()}\"->\"{route.ToStep.Value.RemoveQuotesAndTrim()}\"[label=\"Requires\"];edge[color=black];");
                 }
             }
 

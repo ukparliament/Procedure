@@ -168,6 +168,7 @@
     </Compile>
     <Compile Include="Models\BaseSharepointItem.cs" />
     <Compile Include="Models\BusinessItem.cs" />
+    <Compile Include="Models\GraphVizViewModel.cs" />
     <Compile Include="Models\ListRequestObject.cs" />
     <Compile Include="Models\ProcedureDetailViewModel.cs" />
     <Compile Include="Models\ProcedureItem.cs" />
@@ -215,6 +216,8 @@
     <Content Include="Views\Steps\Details.cshtml" />
     <Content Include="Views\Shared\BusinessItems.cshtml" />
     <Content Include="Views\Procedures\Tree.cshtml" />
+    <Content Include="Views\Procedures\GraphViz.cshtml" />
+    <Content Include="Views\WorkPackages\GraphViz.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">

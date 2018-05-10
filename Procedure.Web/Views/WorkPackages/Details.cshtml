@@ -6,6 +6,7 @@
     <div class="container">
         <div class="block--border">
             <h2>@Model.WorkPackage.Title</h2>
+            @Html.ActionLink("See Graph", "GraphViz", "WorkPackages", new { id = Model.WorkPackage.Id }, new { @class = "btn--primary" })
             <dl class="list--definition">
                 <dt>Subject to </dt>
                 <dd>@Html.ActionLink(Model.WorkPackage.SubjectTo.Value, "Details", "Procedures", new { id = Model.WorkPackage.SubjectTo.Id }, new { })</dd>

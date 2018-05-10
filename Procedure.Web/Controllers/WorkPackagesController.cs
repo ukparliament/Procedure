@@ -69,6 +69,15 @@ namespace Procedure.Web.Controllers
             return File(output, "text/plain");
         }
 
+        [Route("{id:int}/graphviz")]
+        public ActionResult GraphViz(int id)
+        {
+            GraphVizViewModel viewmodel = new GraphVizViewModel();
+            viewmodel.DotString = GiveMeDotString(id);
+
+            return View(viewmodel);
+        }
+
         private string GiveMeDotString(int workPackageId)
         {
             WorkPackageDetailViewModel viewModel = new WorkPackageDetailViewModel();
