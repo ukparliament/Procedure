@@ -18,6 +18,7 @@
     var decodedString = dom.body.textContent;
 
     d3.select("#graph").graphviz()
+        .transition("dummy")
         .renderDot(decodedString, function () {
             console.log('Callback');
         })

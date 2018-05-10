@@ -41,18 +41,12 @@ namespace Procedure.Web.Controllers
         }
 
         [Route("{id:int}/graph")]
-        public ActionResult Graph(int id)
+        public ActionResult GraphViz(int id)
         {
-            var getStartProcessQuery = new GetStartProcessQuery();
-            var getProcessStartInfoQuery = new GetProcessStartInfoQuery();
-            var registerLayoutPluginCommand = new RegisterLayoutPluginCommand(getProcessStartInfoQuery, getStartProcessQuery);
-            var wrapper = new GraphGeneration(getStartProcessQuery,
-                                              getProcessStartInfoQuery,
-                                              registerLayoutPluginCommand);
+            GraphVizViewModel viewmodel = new GraphVizViewModel();
+            viewmodel.DotString = GiveMeDotString(id);
 
-            byte[] output = wrapper.GenerateGraph(GiveMeDotString(id), Enums.GraphReturnType.Svg);
-            string graph = string.Format("data:image/svg+xml;base64,{0}", Convert.ToBase64String(output));
-            return File(output, "image/svg+xml");
+            return View(viewmodel);
         }
 
         [Route("{id:int}/graph.dot")]
@@ -67,15 +61,6 @@ namespace Procedure.Web.Controllers
 
             byte[] output = wrapper.GenerateGraph(GiveMeDotString(id), Enums.GraphReturnType.Plain);
             return File(output, "text/plain");
-        }
-
-        [Route("{id:int}/graphviz")]
-        public ActionResult GraphViz(int id)
-        {
-            GraphVizViewModel viewmodel = new GraphVizViewModel();
-            viewmodel.DotString = GiveMeDotString(id);
-
-            return View(viewmodel);
         }
 
         private string GiveMeDotString(int workPackageId)

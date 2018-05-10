@@ -51,21 +51,6 @@ namespace Procedure.Web.Controllers
 
         // Renders DOT/Graphviz, an open graph description language (https://www.graphviz.org/doc/info/lang.html)
         [Route("{id:int}/graph")]
-        public ActionResult Graph(int id)
-        {
-            var getStartProcessQuery = new GetStartProcessQuery();
-            var getProcessStartInfoQuery = new GetProcessStartInfoQuery();
-            var registerLayoutPluginCommand = new RegisterLayoutPluginCommand(getProcessStartInfoQuery, getStartProcessQuery);
-            var wrapper = new GraphGeneration(getStartProcessQuery,
-                                              getProcessStartInfoQuery,
-                                              registerLayoutPluginCommand);
-
-            byte[] output = wrapper.GenerateGraph(GiveMeDotString(id), Enums.GraphReturnType.Svg);
-            string graph = string.Format("data:image/svg+xml;base64,{0}", Convert.ToBase64String(output));
-            return File(output, "image/svg+xml");
-        }
-
-        [Route("{id:int}/graphviz")]
         public ActionResult GraphViz(int id)
         {
             GraphVizViewModel viewmodel = new GraphVizViewModel();
