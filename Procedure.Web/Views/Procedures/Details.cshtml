@@ -4,14 +4,14 @@
 <section>
     <div class="container">
         <h2>@Model.Procedure.Title</h2>
+        @Html.ActionLink("See Graph", "Graph", "Procedures", new { id = Model.Procedure.Id }, new { @class = "btn--primary" })
+        <p>
+            Available formats:
+            @Html.ActionLink("DOT (.gv)", "GraphDot", "Procedures", new { id = Model.Procedure.Id }, new {  }),
+            @Html.ActionLink("GraphML (.graphml)", "GraphML", "Procedures", new { id = Model.Procedure.Id }, new {  })
+        </p>
         @{
             Html.RenderPartial("Tree", Model.Tree);
         }
-    </div>
-</section>
-
-<section>
-    <div class="container">
-    @*    <h2>@Model.Procedure.TripleStoreId</h2>*@
     </div>
 </section>

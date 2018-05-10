@@ -161,6 +161,7 @@
     <Compile Include="Controllers\ProceduresController.cs" />
     <Compile Include="Controllers\StepsController.cs" />
     <Compile Include="Controllers\WorkPackagesController.cs" />
+    <Compile Include="Extensions\IEnumerableExtension.cs" />
     <Compile Include="Extensions\StringExtension.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>

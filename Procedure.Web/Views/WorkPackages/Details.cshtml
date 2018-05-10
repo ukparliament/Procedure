@@ -1,4 +1,5 @@
 ﻿@using Procedure.Web.Models
+@using Procedure.Web.Extensions
 @model WorkPackageDetailViewModel
 
 <section>
@@ -15,6 +16,13 @@
 
 <section>
     <div class="container">
-        @{Html.RenderPartial("DetailsRoute", Model.Tree); }
+        @if (!Model.Tree.IsNullOrEmpty())
+        {
+            Html.RenderPartial("DetailsRoute", Model.Tree);
+        }
+        else
+        {
+            <p> No actualised business items.</p>
+        }
     </div>
 </section>
