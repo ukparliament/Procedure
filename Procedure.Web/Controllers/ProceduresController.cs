@@ -65,6 +65,21 @@ namespace Procedure.Web.Controllers
             return File(output, "image/svg+xml");
         }
 
+        [Route("{id:int}/graphtest")]
+        public ActionResult GraphTest(int id)
+        {
+            var getStartProcessQuery = new GetStartProcessQuery();
+            var getProcessStartInfoQuery = new GetProcessStartInfoQuery();
+            var registerLayoutPluginCommand = new RegisterLayoutPluginCommand(getProcessStartInfoQuery, getStartProcessQuery);
+            var wrapper = new GraphGeneration(getStartProcessQuery,
+                                              getProcessStartInfoQuery,
+                                              registerLayoutPluginCommand);
+
+            byte[] output = wrapper.GenerateGraph(GiveMeDotString(id), Enums.GraphReturnType.Png);
+            string graph = string.Format("data:image/png;base64,{0}", Convert.ToBase64String(output));
+            return File(output, "image/png");
+        }
+
         // Return graph in DOT string
         [Route("{id:int}/graph.dot")]
         public ActionResult GraphDot(int id)
