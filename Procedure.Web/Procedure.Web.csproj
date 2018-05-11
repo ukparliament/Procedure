@@ -216,8 +216,7 @@
     <Content Include="Views\Steps\Details.cshtml" />
     <Content Include="Views\Shared\BusinessItems.cshtml" />
     <Content Include="Views\Procedures\Tree.cshtml" />
-    <Content Include="Views\Procedures\GraphViz.cshtml" />
-    <Content Include="Views\WorkPackages\GraphViz.cshtml" />
+    <Content Include="Views\Shared\GraphViz.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">
