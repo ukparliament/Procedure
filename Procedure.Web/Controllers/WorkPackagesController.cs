@@ -33,10 +33,13 @@ namespace Procedure.Web.Controllers
             {
                 workPackageResponse = responseMessage.Content.ReadAsStringAsync().Result;
             }
-            viewModel.WorkPackage = ((JObject)JsonConvert.DeserializeObject(workPackageResponse)).ToObject<WorkPackageItem>();
+            WorkPackageItem workPackage = ((JObject)JsonConvert.DeserializeObject(workPackageResponse)).ToObject<WorkPackageItem>();
 
-            viewModel.Tree = giveMeTheTree(id, viewModel.WorkPackage.SubjectTo.Id);
-
+            if (workPackage.Id != 0)
+            {
+                viewModel.WorkPackage = workPackage;
+                viewModel.Tree = giveMeTheTree(id, viewModel.WorkPackage.SubjectTo.Id);
+            }
             return View(viewModel);
         }
 
@@ -85,7 +88,7 @@ namespace Procedure.Web.Controllers
 
             List<BusinessItem> businessItemList = jsonBusinessItem.SelectToken("value").ToObject<List<BusinessItem>>();
             int[] actualizedStepIds = businessItemList
-                .SelectMany(bi => bi.Actualises.Select(s => s.Id))
+                .SelectMany(bi => bi.ActualisesProcedureStep.Select(s => s.Id))
                 .ToArray();
 
             // Get all their possible next steps (this needs procedure ID param)
@@ -163,7 +166,7 @@ namespace Procedure.Web.Controllers
             JObject jsonBusinessItem = (JObject)JsonConvert.DeserializeObject(businessItemResponse);
             List<BusinessItem> allBusinessItems = ((JArray)jsonBusinessItem.SelectToken("value")).ToObject<List<BusinessItem>>();
             int[] stepsDone = allBusinessItems
-                .SelectMany(bi => bi.Actualises.Select(s => s.Id))
+                .SelectMany(bi => bi.ActualisesProcedureStep.Select(s => s.Id))
                 .ToArray();
 
             List<ProcedureRouteTree> procedureTree = GenerateProcedureTree(procedureId);
@@ -172,14 +175,14 @@ namespace Procedure.Web.Controllers
             foreach (ProcedureRouteTree procedureRouteTreeItem in procedureTree)
             {
                 List<BaseSharepointItem> businessItems = allBusinessItems
-                    .Where(bi => bi.Actualises.Any(s => s.Id == procedureRouteTreeItem.Step.Id))
+                    .Where(bi => bi.ActualisesProcedureStep.Any(s => s.Id == procedureRouteTreeItem.Step.Id))
                     .Select(bi => new BaseSharepointItem() { Id = bi.Id, Title = bi.Title })
                     .ToList();
                 if (businessItems.Any())
                 {
                     foreach (BusinessItem businessItem in allBusinessItems.Where(bi => businessItems.Exists(b => b.Id == bi.Id)))
-                        businessItem.Actualises.RemoveAll(s => s.Id == procedureRouteTreeItem.Step.Id);
-                    allBusinessItems.RemoveAll(bi => bi.Actualises.Any() == false);
+                        businessItem.ActualisesProcedureStep.RemoveAll(s => s.Id == procedureRouteTreeItem.Step.Id);
+                    allBusinessItems.RemoveAll(bi => bi.ActualisesProcedureStep.Any() == false);
                     result.Add(new WorkPackageRouteTree()
                     {
                         BusinessItems = businessItems,
@@ -202,13 +205,13 @@ namespace Procedure.Web.Controllers
             foreach (ProcedureRouteTree procedureRouteTreeItem in procedureTree)
             {
                 List<BaseSharepointItem> businessItems = allBusinessItems
-                    .Where(bi => bi.Actualises.Any(s => s.Id == procedureRouteTreeItem.Step.Id))
+                    .Where(bi => bi.ActualisesProcedureStep.Any(s => s.Id == procedureRouteTreeItem.Step.Id))
                     .Select(bi => new BaseSharepointItem() { Id = bi.Id, Title = bi.Title })
                     .ToList();
                 bool isPrecluded = precludedSteps.Contains(procedureRouteTreeItem.Step.Id);
                 foreach (BusinessItem businessItem in allBusinessItems.Where(bi => businessItems.Exists(b => b.Id == bi.Id)))
-                    businessItem.Actualises.RemoveAll(s => s.Id == procedureRouteTreeItem.Step.Id);
-                allBusinessItems.RemoveAll(bi => bi.Actualises.Any() == false);
+                    businessItem.ActualisesProcedureStep.RemoveAll(s => s.Id == procedureRouteTreeItem.Step.Id);
+                allBusinessItems.RemoveAll(bi => bi.ActualisesProcedureStep.Any() == false);
                 result.Add(new WorkPackageRouteTree()
                 {
                     BusinessItems = businessItems,

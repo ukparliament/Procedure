@@ -2,28 +2,40 @@
 @using Procedure.Web.Extensions
 @model WorkPackageDetailViewModel
 
-<section>
-    <div class="container">
-        <div class="block--border">
-            <h2>@Model.WorkPackage.Title</h2>
-            @Html.ActionLink("See Graph", "GraphViz", "WorkPackages", new { id = Model.WorkPackage.Id }, new { @class = "btn--primary" })
-            <dl class="list--definition">
-                <dt>Subject to </dt>
-                <dd>@Html.ActionLink(Model.WorkPackage.SubjectTo.Value, "Details", "Procedures", new { id = Model.WorkPackage.SubjectTo.Id }, new { })</dd>
-            </dl>
+@if (Model.WorkPackage != null)
+{
+    <section>
+        <div class="container">
+            <div class="block--border">
+                <h2>@Model.WorkPackage.Title</h2>
+                @Html.ActionLink("See Graph", "GraphViz", "WorkPackages", new { id = Model.WorkPackage.Id }, new { @class = "btn--primary" })
+                <dl class="list--definition">
+                    <dt>Subject to </dt>
+                    <dd>@Html.ActionLink(Model.WorkPackage.SubjectTo.Value, "Details", "Procedures", new { id = Model.WorkPackage.SubjectTo.Id }, new { })</dd>
+                </dl>
+            </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<section>
-    <div class="container">
-        @if (!Model.Tree.IsNullOrEmpty())
-        {
-            Html.RenderPartial("DetailsRoute", Model.Tree);
-        }
-        else
-        {
-            <p> No business items</p>
-        }
-    </div>
-</section>
+    <section>
+        <div class="container">
+            @if (!Model.Tree.IsNullOrEmpty())
+            {
+                Html.RenderPartial("DetailsRoute", Model.Tree);
+            }
+            else
+            {
+                <p> No tree shown because there are no business items or no entry steps (e.g. SI exists) have been defined.</p>
+            }
+        </div>
+    </section>
+}
+else
+{
+    <section>
+        <div class="container">
+            <h3>The work package does not exist or has been deleted.</h3>
+        </div>
+    </section>
+
+}

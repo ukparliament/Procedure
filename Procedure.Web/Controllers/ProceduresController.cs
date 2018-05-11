@@ -43,8 +43,13 @@ namespace Procedure.Web.Controllers
             {
                 procedureResponse = responseMessage.Content.ReadAsStringAsync().Result;
             }
-            viewModel.Procedure = ((JObject)JsonConvert.DeserializeObject(procedureResponse)).ToObject<ProcedureItem>();
-            viewModel.Tree = GenerateProcedureTree(id);
+            ProcedureItem procedureItem = ((JObject)JsonConvert.DeserializeObject(procedureResponse)).ToObject<ProcedureItem>();
+
+            if (procedureItem.Id != 0)
+            {
+                viewModel.Procedure = procedureItem;
+                viewModel.Tree = GenerateProcedureTree(id);
+            }
 
             return View(viewModel);
         }
@@ -87,16 +92,20 @@ namespace Procedure.Web.Controllers
             StringBuilder builder = new StringBuilder("graph[fontname=\"calibri\"];node[fontname=\"calibri\"];edge[fontname=\"calibri\"];");
             foreach (RouteItem route in routes)
             {
-                if (route.RouteKind == RouteType.Causes) {
+                if (route.RouteKind == RouteType.Causes)
+                {
                     builder.Append($"\"{route.FromStep.Value.RemoveQuotesAndTrim()}\"->\"{route.ToStep.Value.RemoveQuotesAndTrim()}\"[label=\"Causes\"]; ");
                 }
-                if (route.RouteKind == RouteType.Allows) {
+                if (route.RouteKind == RouteType.Allows)
+                {
                     builder.Append($"edge [color=red];\"{route.FromStep.Value.RemoveQuotesAndTrim()}\"->\"{route.ToStep.Value.RemoveQuotesAndTrim()}\"[label=\"Allows\"];edge[color=black];");
                 }
-                if (route.RouteKind == RouteType.Precludes) { 
+                if (route.RouteKind == RouteType.Precludes)
+                {
                     builder.Append($"edge [color=blue];\"{route.FromStep.Value.RemoveQuotesAndTrim()}\"->\"{route.ToStep.Value.RemoveQuotesAndTrim()}\"[label=\"Precludes\"];edge[color=black];");
                 }
-                if (route.RouteKind == RouteType.Requires) {
+                if (route.RouteKind == RouteType.Requires)
+                {
                     builder.Append($"edge [color=yellow];\"{route.FromStep.Value.RemoveQuotesAndTrim()}\"->\"{route.ToStep.Value.RemoveQuotesAndTrim()}\"[label=\"Requires\"];edge[color=black];");
                 }
             }
@@ -144,7 +153,7 @@ namespace Procedure.Web.Controllers
             // Nodes 
             SparqlQuery q1 = parser.ParseFromString("PREFIX : <https://id.parliament.uk/schema/> SELECT ?step ?stepName WHERE {?step a :ProcedureStep; :procedureStepName ?stepName. }");
             SparqlResultSet nodes = (SparqlResultSet)graph.ExecuteQuery(q1);
-            
+
             // Edges
             SparqlQuery q2 = parser.ParseFromString("PREFIX : <https://id.parliament.uk/schema/> SELECT ?route ?fromStep ?toStep WHERE {?route a :ProcedureRoute; :procedureRouteIsFromProcedureStep ?fromStep; :procedureRouteIsToProcedureStep ?toStep.}");
             SparqlResultSet edges = (SparqlResultSet)graph.ExecuteQuery(q2);
@@ -152,7 +161,7 @@ namespace Procedure.Web.Controllers
             // Create GraphML 
             StringWriter sw = new Utf8StringWriter();
             XmlWriterSettings xws = new XmlWriterSettings();
-            xws.OmitXmlDeclaration = false; 
+            xws.OmitXmlDeclaration = false;
             xws.Indent = true;
 
             using (XmlWriter xw = XmlWriter.Create(sw, xws))
@@ -179,7 +188,7 @@ namespace Procedure.Web.Controllers
 
             return Content(sw.ToString(), "application/xml");
 
-            }
+        }
 
         // Using LINQ to XML, if you choose to write to stream instead of disk, the XML doc will automatically be encoded to match 
         // the stream's default encoding, in this case utf-16, which is not what we want

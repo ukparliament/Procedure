@@ -1,12 +1,25 @@
 ﻿@using Procedure.Web.Models
 @model ProcedureDetailViewModel
 
-<section>
-    <div class="container">
-        <h2>@Model.Procedure.Title</h2>
-        @Html.ActionLink("See Graph", "GraphViz", "Procedures", new { id = Model.Procedure.Id }, new { @class = "btn--primary" })
-        @{
-            Html.RenderPartial("Tree", Model.Tree);
-        }
-    </div>
-</section>
+@if (Model.Procedure != null)
+{
+
+    <section>
+        <div class="container">
+            <h2>@Model.Procedure.Title</h2>
+            @Html.ActionLink("See Graph", "GraphViz", "Procedures", new { id = Model.Procedure.Id }, new { @class = "btn--primary" })
+            @{
+                Html.RenderPartial("Tree", Model.Tree);
+            }
+        </div>
+    </section>
+
+}
+else
+{
+    <section>
+        <div class="container">
+            <h3>The procedure does not exist or has been deleted.</h3>
+        </div>
+    </section>
+}
