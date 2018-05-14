@@ -1,18 +1,18 @@
 ﻿@using Procedure.Web.Models
-@model List<BaseSharepointItem>
+@model List<BusinessItem>
 
 @if (Model != null && Model.Any())
 {
     if (Model.Count == 1)
     {
-        <span>[@Model[0].Title]</span>
+        <span>[@Model[0].AllData()]</span>
     }
     else
     {
         <ul class="list--definition">
-            @foreach (BaseSharepointItem businessItem in Model)
+            @foreach (BusinessItem businessItem in Model)
             {
-                <li>[@businessItem.Title]</li>
+                <li>[@businessItem.AllData()]</li>
             }
         </ul>
     }

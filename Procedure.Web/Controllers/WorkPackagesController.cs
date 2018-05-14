@@ -109,27 +109,32 @@ namespace Procedure.Web.Controllers
 
             foreach (RouteItem route in actualizedRouteItems)
             {
-                if (route.RouteKind == RouteType.Causes) {
+                if (route.RouteKind == RouteType.Causes)
+                {
                     builder.Append($"\"{route.FromStep.Value.RemoveQuotesAndTrim()}\" -> \"{route.ToStep.Value.RemoveQuotesAndTrim()}\" [label = \"Causes\"]; ");
                 }
-                if (route.RouteKind == RouteType.Allows) {
+                if (route.RouteKind == RouteType.Allows)
+                {
                     builder.Append($"edge [color=red]; \"{route.FromStep.Value.RemoveQuotesAndTrim()}\" -> \"{route.ToStep.Value.RemoveQuotesAndTrim()}\" [label = \"Allows\"]; edge [color=black];");
                 }
-                if (route.RouteKind == RouteType.Precludes) {
+                if (route.RouteKind == RouteType.Precludes)
+                {
                     builder.Append($"edge [color=blue]; \"{route.FromStep.Value.RemoveQuotesAndTrim()}\" -> \"{route.ToStep.Value.RemoveQuotesAndTrim()}\" [label = \"Precludes\"]; edge [color=black];");
                 }
                 if (route.RouteKind == RouteType.Requires)
                 {
                     builder.Append($"edge [color=yellow]; \"{route.FromStep.Value.RemoveQuotesAndTrim()}\" -> \"{route.ToStep.Value.RemoveQuotesAndTrim()}\" [label = \"Requires\"]; edge [color=black];");
                 }
-                if (actualizedStepIds.Contains(route.FromStep.Id)) {
+                if (actualizedStepIds.Contains(route.FromStep.Id))
+                {
                     builder.Append($"\"{route.FromStep.Value.RemoveQuotesAndTrim()}\" [style=filled,color=\"gray\"];");
                 }
             }
 
             foreach (RouteItem route in lastActualizedRouteItems)
             {
-                if (!blackOutStepIds.Contains(route.FromStep.Id) & !new[]{RouteType.Precludes, RouteType.Requires}.Contains(route.RouteKind) ) {
+                if (!blackOutStepIds.Contains(route.FromStep.Id) & !new[] { RouteType.Precludes, RouteType.Requires }.Contains(route.RouteKind))
+                {
                     builder.Append($"\"{route.ToStep.Value.RemoveQuotesAndTrim()}\" [style=filled,peripheries=2,color=\"orange\"];");
                 }
             }
@@ -174,9 +179,8 @@ namespace Procedure.Web.Controllers
 
             foreach (ProcedureRouteTree procedureRouteTreeItem in procedureTree)
             {
-                List<BaseSharepointItem> businessItems = allBusinessItems
+                List<BusinessItem> businessItems = allBusinessItems
                     .Where(bi => bi.ActualisesProcedureStep.Any(s => s.Id == procedureRouteTreeItem.Step.Id))
-                    .Select(bi => new BaseSharepointItem() { Id = bi.Id, Title = bi.Title })
                     .ToList();
                 if (businessItems.Any())
                 {
@@ -204,9 +208,8 @@ namespace Procedure.Web.Controllers
 
             foreach (ProcedureRouteTree procedureRouteTreeItem in procedureTree)
             {
-                List<BaseSharepointItem> businessItems = allBusinessItems
+                List<BusinessItem> businessItems = allBusinessItems
                     .Where(bi => bi.ActualisesProcedureStep.Any(s => s.Id == procedureRouteTreeItem.Step.Id))
-                    .Select(bi => new BaseSharepointItem() { Id = bi.Id, Title = bi.Title })
                     .ToList();
                 bool isPrecluded = precludedSteps.Contains(procedureRouteTreeItem.Step.Id);
                 foreach (BusinessItem businessItem in allBusinessItems.Where(bi => businessItems.Exists(b => b.Id == bi.Id)))
