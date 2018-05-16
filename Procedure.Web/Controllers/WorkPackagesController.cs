@@ -100,11 +100,13 @@ namespace Procedure.Web.Controllers
                 int[] blackOutFromStepIds = nonSelfReferencedRoutesWithBothEndsActualized.Select(r => r.FromStep.Id).ToArray();
                 int[] blackOutToStepsIds = routesWithActualizedFromSteps.Where(r => r.RouteKind == RouteType.Precludes).Select(r => r.ToStep.Id).ToArray();
 
+                IEnumerable<int> unBlackOut = routes.Except(precludeOrRequireRoutes).GroupBy(r => r.FromStep.Id).Select(group => new { fromStep = group.Key, routeCount = group.Count()}).Where(g => g.routeCount > 1).Select(g => g.fromStep);
+
                 StringBuilder builder = new StringBuilder("graph [fontname = \"calibri\"]; node[fontname = \"calibri\"]; edge[fontname = \"calibri\"];");
 
                 foreach (RouteItem route in routesWithActualizedFromSteps)
                 {
-                    if (nonSelfReferencedRoutesWithBothEndsActualized.Contains(route) || (!blackOutFromStepIds.Contains(route.FromStep.Id) && !blackOutToStepsIds.Contains(route.ToStep.Id) && !new[] { RouteType.Precludes, RouteType.Requires }.Contains(route.RouteKind)))
+                    if (nonSelfReferencedRoutesWithBothEndsActualized.Contains(route) || (!blackOutToStepsIds.Contains(route.ToStep.Id) && !new[] { RouteType.Precludes, RouteType.Requires }.Contains(route.RouteKind)))
                     {
                         if (route.RouteKind == RouteType.Causes)
                         {
@@ -131,7 +133,7 @@ namespace Procedure.Web.Controllers
                             builder.Append($"\"{route.FromStep.Value.RemoveQuotesAndTrim()}\" [style=\"filled\",color=\"lemonchiffon2\"];");
                         }
                     }
-                    if (!blackOutFromStepIds.Contains(route.FromStep.Id) && !blackOutToStepsIds.Contains(route.ToStep.Id) && !new[] { RouteType.Precludes, RouteType.Requires }.Contains(route.RouteKind))
+                    if (!blackOutFromStepIds.Except(unBlackOut).Contains(route.FromStep.Id) && !blackOutToStepsIds.Contains(route.ToStep.Id) && !new[] { RouteType.Precludes, RouteType.Requires }.Contains(route.RouteKind))
                     {
                         builder.Append($"\"{route.ToStep.Value.RemoveQuotesAndTrim()}\" [color=\"orange\",peripheries=2];");
                     }
