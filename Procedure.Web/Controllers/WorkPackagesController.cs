@@ -125,27 +125,31 @@ namespace Procedure.Web.Controllers
                             builder.Append($"edge [color=yellow]; \"{route.FromStep.Value.RemoveQuotesAndTrim()}\" -> \"{route.ToStep.Value.RemoveQuotesAndTrim()}\" [label = \"Requires\"]; edge [color=black];");
                         }
                     }
-                    if (actualizedStepIds.Contains(route.FromStep.Id))
-                    {   
-                        builder.Append($"\"{route.FromStep.Value.RemoveQuotesAndTrim()}\" [style=filled,color=\"gray\"];");
-                        if (canActualizeSelfAgainStepIds.Contains(route.FromStep.Id))
-                        {
-                            builder.Append($"\"{route.FromStep.Value.RemoveQuotesAndTrim()}\" [style=\"filled\",color=\"lemonchiffon2\"];");
-                        }
-                    }
                     if (!blackOutFromStepIds.Except(unBlackOut).Contains(route.FromStep.Id) && !blackOutToStepsIds.Contains(route.ToStep.Id) && !new[] { RouteType.Precludes, RouteType.Requires }.Contains(route.RouteKind))
                     {
-                        builder.Append($"\"{route.ToStep.Value.RemoveQuotesAndTrim()}\" [color=\"orange\",peripheries=2];");
+                        builder.Append($"\"{route.ToStep.Value.RemoveQuotesAndTrim()}\" [style=filled,fillcolor=white,color=orange,peripheries=2];");
                     }
-
+                    if (actualizedStepIds.Contains(route.FromStep.Id))
+                    {
+                        builder.Append($"\"{route.FromStep.Value.RemoveQuotesAndTrim()}\" [style=filled,color=gray];");
+                    }
+                    if (actualizedStepIds.Contains(route.FromStep.Id) && canActualizeSelfAgainStepIds.Contains(route.FromStep.Id))
+                    {
+                        builder.Replace($"\"{route.FromStep.Value.RemoveQuotesAndTrim()}\" [style=filled,color=gray];", $"\"{route.FromStep.Value.RemoveQuotesAndTrim()}\" [style=filled,color=lemonchiffon2];");
+                    }
+                    if (actualizedStepIds.Contains(route.ToStep.Id) && canActualizeSelfAgainStepIds.Contains(route.ToStep.Id))
+                    {
+                        builder.Replace($"\"{route.ToStep.Value.RemoveQuotesAndTrim()}\" [style=filled,fillcolor=white,color=orange,peripheries=2];", $"\"{route.FromStep.Value.RemoveQuotesAndTrim()}\" [style=filled,color=lemonchiffon2];");
+                    }
                 }
+
 
                 // Add a legend
                 builder.Append("subgraph cluster_key {" +
                     "label=\"Key\"; labeljust=\"l\" " +
-                    "k1[label=\"Actualised step\", style=filled, color=\"gray\"]" +
-                    "k2[label=\"Actualised step that can be actualised again\", style=filled, color=\"lemonchiffon2\"]" +
-                    "k3[label=\"Possible next step yet to be actualised\", color=\"orange\", peripheries=2]; node [shape=plaintext];" +
+                    "k1[label=\"Actualised step\", style=filled, color=gray]" +
+                    "k2[label=\"Actualised step that can be actualised again\", style=filled, color=lemonchiffon2]" +
+                    "k3[label=\"Possible next step yet to be actualised\" style=filled,fillcolor=white, color=orange, peripheries=2]; node [shape=plaintext];" +
                     "ktable [label=<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\"> " +
                     "<tr><td align=\"right\" port=\"i1\" > Causes </td></tr>" +
                     "<tr><td align=\"right\" port=\"i2\"> Allows </td></tr>" +
