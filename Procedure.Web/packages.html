@@ -1,0 +1,166 @@
+﻿<html>
+<head>
+    <base href="https://api.parliament.uk/viewer/" />
+    <style>
+        body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+        }
+
+        ul {
+            overflow: auto;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            list-style-type: none;
+            flex-shrink: 0;
+        }
+
+        li {
+            margin: 10px;
+        }
+
+        a {
+            font-family: monospace
+        }
+
+        iframe {
+            background-color: #373151;
+            min-width: 0;
+            height: 100%;
+            flex-grow: 1;
+        }
+    </style>
+    <script>
+        let urlTemplate = "https://api.parliament.uk/Staging/sparql-endpoint/master?subscription-key=ae77214d28654f82884f7143ef16b9dd&query=";
+        let packagesQuery = `
+PREFIX : <https://id.parliament.uk/schema/>
+
+SELECT DISTINCT ?package
+WHERE {
+    ?package a :WorkPackage .
+    ?package :workPackageHasBusinessItem ?item .
+}
+`;
+
+
+        let queryTemplate = `
+PREFIX : <https://id.parliament.uk/schema/>
+PREFIX ex: <https://id.parliament.uk/schema/>
+
+CONSTRUCT {
+    ?actualizedStepEncoded ex:LEDTO ?otherActualizedStepEncoded .
+    ?enablingStepEncoded ex:ENABLES ?possibleStepEncoded .
+}
+WHERE {
+    BIND(<@workPackageId> AS ?package)
+
+    ?procedure :procedureHasWorkPackage ?package .
+
+    {
+        ?enablingStep :procedureStepHasBusinessItem/:businessItemHasWorkPackage ?package .
+        ?enablingStep :procedureStepName ?enablingName .
+        BIND(IRI(CONCAT("https://id.parliament.uk/schema/", REPLACE(?enablingName, " ", "_"))) AS ?enablingStepEncoded)
+
+        ?possibleRoute :procedureRouteHasProcedure ?procedure .
+        ?possibleRoute :procedureRouteIsFromProcedureStep ?enablingStep .
+        ?possibleRoute :procedureRouteIsToProcedureStep ?possibleStep .
+
+        ?possibleStep :procedureStepName ?possibleName .
+        BIND(IRI(CONCAT("https://id.parliament.uk/schema/", REPLACE(?possibleName, " ", "_"))) AS ?possibleStepEncoded)
+
+        FILTER NOT EXISTS {
+            ?possibleStep :procedureStepHasBusinessItem/:businessItemHasWorkPackage ?package .
+        }
+
+        FILTER NOT EXISTS {
+            ?precludingRoute :procedureRouteIsToProcedureStep ?possibleStep .
+            ?precludingRoute :procedureRouteHasProcedure ?procedure .
+            ?precludingRoute :precludedProcedureRouteIsPrecludedByProcedureStep/:procedureStepHasBusinessItem/:businessItemHasWorkPackage ?package .
+        }
+
+        FILTER NOT EXISTS {
+            ?reqRoute :requiredProcedureRouteIsRequiredByProcedureStep ?possibleStep .
+            ?reqRoute :procedureRouteHasProcedure ?procedure .
+
+            FILTER NOT EXISTS {
+                ?reqRoute :procedureRouteIsToProcedureStep/:procedureStepHasBusinessItem/:businessItemHasWorkPackage ?package .
+            }
+        }
+    }
+    UNION
+    {
+        ?actualizedItem :businessItemHasWorkPackage ?package .
+        ?actualizedItem :businessItemHasProcedureStep ?actualizedStep .
+
+        ?actualizedStep :procedureStepName ?actualizedStepName .
+        BIND(IRI(CONCAT("https://id.parliament.uk/schema/", REPLACE(?actualizedStepName, " ", "_"))) AS ?actualizedStepEncoded)
+
+        OPTIONAL {
+            ?actualizedRoute :procedureRouteIsFromProcedureStep ?actualizedStep .
+            ?actualizedRoute :procedureRouteIsToProcedureStep ?otherActualizedStep .
+            ?actualizedRoute :procedureRouteHasProcedure ?procedure .
+
+            ?otherActualizedStep :procedureStepHasBusinessItem/:businessItemHasWorkPackage ?package .
+            ?otherActualizedStep :procedureStepName ?actualizedOtherStepName .
+            BIND(IRI(CONCAT("https://id.parliament.uk/schema/", REPLACE(?actualizedOtherStepName, " ", "_"))) AS ?otherActualizedStepEncoded)
+
+            FILTER (?otherActualizedStep != ?actualizedStep)
+        }
+    }
+}
+`;
+
+        window.addEventListener("load", onLoad);
+
+        function onLoad() {
+            let encodedQuery = encodeURI(packagesQuery);
+            let url = urlTemplate + encodedQuery;
+            var options = {
+                headers: {
+                    accept: "application/sparql-results+json"
+                }
+            };
+
+            fetch(url, options)
+                .then(response => response.json())
+                .then(json => render(json.results.bindings.map(binding => binding.package.value)));
+        }
+
+        function render(data) {
+            document.querySelector("ul").children[0].remove();
+
+            data.map(createViewerLinkItem).forEach(appendItem);
+        }
+
+        function createViewerLinkItem(id) {
+            let itemElement = document.createElement("li");
+            let linkElement = document.createElement("a");
+            itemElement.appendChild(linkElement);
+            linkElement.text = id.substring(25);
+            linkElement.href = createViewerUrl(id);
+            linkElement.target = "viewer";
+
+            return itemElement;
+        }
+
+        function createViewerUrl(id) {
+            let query = queryTemplate.replace("@workPackageId", id);
+            let encodedQuery = encodeURI(query);
+            let url = "?" + Math.random().toString() + "#" + urlTemplate + encodedQuery;
+            return url;
+        }
+
+        function appendItem(item) {
+            document.querySelector("ul").appendChild(item);
+        }
+    </script>
+</head>
+<body>
+    <ul>
+        <li>Package list loading</li>
+    </ul>
+    <iframe frameborder="0" name="viewer"></iframe>
+</body>
+</html>
