@@ -29,7 +29,8 @@ namespace Procedure.Web.Controllers
             }
             catch (Exception e)
             {
-                return RedirectToAction("GraphViz", new { dotString = e.Message}); ;
+                TempData["StringFromRedirect"] = e.Message;
+                return RedirectToAction("GraphViz");
             }
             // string passAlong = "digraph {a -> b}";
             StringBuilder builder = new StringBuilder("graph [fontname = \"calibri\"]; node[fontname = \"calibri\"]; edge[fontname = \"calibri\"];");
@@ -69,10 +70,26 @@ namespace Procedure.Web.Controllers
                 }
             }
 
+            builder.Append("subgraph cluster_key {" +
+                    "label=\"Key\"; labeljust=\"l\" " +
+                    "k1[label=\"Actualised step\", style=filled, color=gray]" +
+                    "k2[label=\"Actualised step that can be actualised again\", style=filled, color=lemonchiffon2]" +
+                    "k3[label=\"Possible next step yet to be actualised\" style=filled,fillcolor=white, color=orange, peripheries=2]; node [shape=plaintext];" +
+                    "ktable [label=<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\"> " +
+                    "<tr><td align=\"right\" port=\"i1\" > Causes </td></tr>" +
+                    "<tr><td align=\"right\" port=\"i2\"> Allows </td></tr>" +
+                    "<tr><td align=\"right\" port=\"i3\" > Precludes </td></tr>" +
+                    "<tr><td align=\"right\" port=\"i4\" > Requires </td></tr> </table>>];" +
+                    "ktabledest [label =<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\">" +
+                    "<tr><td port=\"i1\" > &nbsp;</td></tr> <tr><td port=\"i2\"> &nbsp;</td></tr> <tr><td port=\"i3\"> &nbsp;</td></tr> <tr><td port=\"i4\"> &nbsp;</td></tr> </table>>];" +
+                    "ktable:i1:e->ktabledest:i1:w ktable:i2:e->ktabledest:i2:w [color=red] ktable:i3:e->ktabledest:i3:w [color = blue] ktable:i4:e->ktabledest:i4:w [color = yellow] {rank = sink; k1 k2 k3}  { rank = same; ktable ktabledest } };");
+
             builder.Insert(0, "digraph{");
             builder.Append("}");
 
-            return RedirectToAction("GraphViz", new { dotString = builder.ToString() });
+            TempData["StringFromRedirect"] = builder.ToString();
+
+            return RedirectToAction("GraphViz"); 
         }
 
         private SparqlResultSet getNameFromGraph(SparqlQueryParser parser, INode stepNode, string predicateForName, IGraph g)
@@ -87,13 +104,16 @@ namespace Procedure.Web.Controllers
             return (SparqlResultSet)g.ExecuteQuery(check);
         }
 
-        [Route("generated")]
-        public ActionResult GraphViz(string dotString)
+        [Route("generate")]
+        public ActionResult GraphViz()
         {
             GraphVizViewModel viewmodel = new GraphVizViewModel();
-            if (dotString.StartsWith("digraph"))
+
+            string q = TempData["StringFromRedirect"].ToString();
+
+            if (q.StartsWith("digraph"))
             {
-                viewmodel.DotString = dotString;
+                viewmodel.DotString = q;
             }
             else viewmodel.DotString = "";
 
