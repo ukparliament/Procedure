@@ -1,0 +1,117 @@
+﻿<html>
+<head>
+    <base href="https://api.parliament.uk/viewer/" />
+    <style>
+        body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+        }
+
+        ul {
+            overflow: auto;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            list-style-type: none;
+            flex-shrink: 0;
+            border-right: 2px  dashed;
+        }
+
+        li {
+            margin: 10px;
+        }
+
+        span {
+            font-family: monospace
+        }
+
+        iframe {
+            min-width: 0;
+            height: 100%;
+            flex-grow: 1;
+        }
+    </style>
+    <script>
+        let urlTemplate = "https://api.parliament.uk/Staging/sparql-endpoint/master?subscription-key=ae77214d28654f82884f7143ef16b9dd&query=";
+        let packagesQuery = `
+PREFIX : <https://id.parliament.uk/schema/>
+
+SELECT DISTINCT ?package
+WHERE { ?package a :WorkPackage; :workPackageHasBusinessItem ?item . }
+`;
+
+        window.addEventListener("load", onLoad);
+
+        function onLoad() {
+            let encodedQuery = encodeURI(packagesQuery);
+            let url = urlTemplate + encodedQuery;
+            var options = {
+                headers: {
+                    accept: "application/sparql-results+json"
+                }
+            };
+
+            fetch(url, options)
+                .then(response => response.json())
+                .then(json => render(json.results.bindings.map(binding => binding.package.value)));
+        }
+
+        function render(data) {
+            document.querySelector("ul").children[0].remove();
+
+            data.map(createViewerLinkItem).forEach(appendItem);
+        }
+
+        function createViewerLinkItem(id) {
+            let itemElement = document.createElement("li");
+            let linksElement = createViewerLinks(id);
+            itemElement.appendChild(linksElement);
+
+            return itemElement;
+        }
+
+        function createViewerLinks(id) {
+            var url = "https://api.parliament.uk/staging/fixed-query/work_package_by_id?work_package_id=" + id;
+
+            let linksElement = document.createElement("span");
+
+            linksElement.appendChild(document.createTextNode(id.substring(25)));
+            linksElement.appendChild(document.createTextNode(" "));
+
+            let htmlElement = document.createElement("a");
+            linksElement.appendChild(htmlElement);
+            linksElement.appendChild(document.createTextNode(" "));
+            htmlElement.href = url;
+            htmlElement.target = "viewer";
+            htmlElement.text = ("html");
+
+            let twoDElement = document.createElement("a");
+            linksElement.appendChild(twoDElement);
+            linksElement.appendChild(document.createTextNode(" "));
+            twoDElement.href = "2d/?" + Math.random().toString() + "#" + url;
+            twoDElement.target = "viewer";
+            twoDElement.text = ("2D");
+
+            let threeDElement = document.createElement("a");
+            linksElement.appendChild(threeDElement);
+            linksElement.appendChild(document.createTextNode(" "));
+            threeDElement.href = "?" + Math.random().toString() + "#" + url;
+            threeDElement.target = "viewer";
+            threeDElement.text = ("3D");
+
+            return linksElement;
+        }
+
+        function appendItem(item) {
+            document.querySelector("ul").appendChild(item);
+        }
+    </script>
+</head>
+<body>
+    <ul>
+        <li>Package list loading</li>
+    </ul>
+    <iframe frameborder="0" name="viewer"></iframe>
+</body>
+</html>
