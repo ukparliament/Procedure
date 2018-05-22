@@ -111,18 +111,6 @@ namespace Procedure.Web.Controllers
             //    builder.Append($"{{ rank=same; {String.Join(" ", entry.Value.Select(t => t.Subject.ToString().SurroundWithDoubleQuotes()))} }}");
             //}
 
-            builder.Append("subgraph cluster_key {" +
-                    "label=\"Key\"; labeljust=\"l\" " +
-                    "k1[label=\"Actualised step\", style=filled, color=gray]" +
-                    "k2[label=\"Actualised step that can be actualised again\", style=filled, color=lemonchiffon2]" +
-                    "k3[label=\"Possible next step yet to be actualised\" style=filled,fillcolor=white, color=orange, peripheries=2]; node [shape=plaintext];" +
-                    "ktable [label=<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\"> " +
-                    "<tr><td align=\"right\" port=\"i1\" > Can lead to </td></tr>" +
-                    "<tr><td align=\"right\" port=\"i2\"> Enables </td></tr> </table>>];" +
-                    "ktabledest [label =<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\">" +
-                    "<tr><td port=\"i1\" > &nbsp;</td></tr> <tr><td port=\"i2\"> &nbsp;</td></tr> </table>>];" +
-                    "ktable:i1:e->ktabledest:i1:w ktable:i2:e->ktabledest:i2:w [color=blue] {rank = sink; k1 k2 k3}  { rank = same; ktable ktabledest } };");
-
             builder.Insert(0, "digraph{");
             builder.Append("}");
 
