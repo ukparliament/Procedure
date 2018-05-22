@@ -33,89 +33,72 @@ namespace Procedure.Web.Controllers
 
         public string ConvertRDFToDotString(string inputString)
         {
-            IGraph g = new Graph();
-            try
-            {
-                StringParser.Parse(g, inputString);
-            }
-            catch (Exception e)
-            {
-                return e.Message;
-            }
-
-            StringBuilder builder = new StringBuilder("graph [fontname = \"calibri\"]; node[fontname = \"calibri\"]; edge[fontname = \"calibri\"];");
-
-            g.NamespaceMap.AddNamespace("parl", new Uri("https://id.parliament.uk/schema/"));
+            var g = new Graph();
+            g.NamespaceMap.AddNamespace("", new Uri("https://id.parliament.uk/schema/"));
             g.NamespaceMap.AddNamespace("ex", new Uri("https://example.com/"));
 
-            INode procedureStepName = g.CreateUriNode("parl:procedureStepName");
+            g.LoadFromString(inputString);
 
-            IEnumerable<Triple> canLeadToTriples = g.GetTriplesWithPredicate(g.CreateUriNode("ex:canLeadTo"));
-            foreach (Triple t in canLeadToTriples)
+            var schema_step = g.CreateUriNode(":ProcedureStep");
+            var schema_stepName = g.CreateUriNode(":procedureStepName");
+            var rdf_type = g.CreateUriNode("rdf:type");
+            var ex_possible = g.CreateUriNode("ex:Possible");
+            var ex_actualized = g.CreateUriNode("ex:Actualized");
+            var ex_canLeadTo = g.CreateUriNode("ex:canLeadTo");
+            var ex_ledTo = g.CreateUriNode("ex:ledTo");
+            var ex_enables = g.CreateUriNode("ex:enables");
+
+            var builder = new StringBuilder("digraph { graph [fontname = \"calibri\"]; node [fontname = \"calibri\"]; edge [fontname = \"calibri\"];");
+
+            var steps = g.GetTriplesWithPredicateObject(rdf_type, schema_step).Select(t => t.Subject as IUriNode);
+            foreach (var step in steps)
             {
-                IEnumerable<Triple> fromStepNameTriple = g.GetTriplesWithSubjectPredicate(t.Subject, procedureStepName);
-                IEnumerable<Triple> toStepNameTriple = g.GetTriplesWithSubjectPredicate(t.Object, procedureStepName);
-                if (!fromStepNameTriple.IsNullOrEmpty() && !toStepNameTriple.IsNullOrEmpty())
+                var name = g.GetTriplesWithSubjectPredicate(step, schema_stepName).Select(t => t.Object as ILiteralNode).Single().Value;
+
+                name = string.Join(string.Empty, name.Split(' ').Select((c, i) => c + ((i + 1) % 3 == 0 ? "\\n" : " ")));
+
+                builder.Append($" \"{Reduce(step)}\" [label = \"{name}\"");
+
+                if (g.Triples.Contains(new Triple(step, rdf_type, ex_actualized)))
                 {
-                    Triple passToWriter = new Triple(fromStepNameTriple.FirstOrDefault().Object, t.Predicate, toStepNameTriple.FirstOrDefault().Object);
-                    passToWriter.WriteToDotString(builder, GraphVizEdgeType.CanLeadTo);
+                    builder.Append(", style = filled, color = gray");
                 }
+
+                if (g.Triples.Contains(new Triple(step, rdf_type, ex_possible)))
+                {
+                    builder.Append(", style = filled, fillcolor = white, color = orange, peripheries = 2");
+                }
+
+                builder.Append("];");
             }
 
-            IEnumerable<Triple> canEnablesTriples = g.GetTriplesWithPredicate(g.CreateUriNode("ex:enables"));
-            foreach (Triple t in canEnablesTriples)
+            var routes = g.GetTriplesWithPredicate(ex_canLeadTo);
+            foreach (var route in routes)
             {
-                IEnumerable<Triple> fromStepNameTriple = g.GetTriplesWithSubjectPredicate(t.Subject, procedureStepName);
-                IEnumerable<Triple> toStepNameTriple = g.GetTriplesWithSubjectPredicate(t.Object, procedureStepName);
-                if (!fromStepNameTriple.IsNullOrEmpty() && !toStepNameTriple.IsNullOrEmpty())
+                builder.Append($" \"{Reduce(route.Subject as IUriNode)}\" -> \"{Reduce(route.Object as IUriNode)}\" [label = \"");
+
+                var moreRoutes = g.GetTriplesWithSubjectObject(route.Subject, route.Object);
+                if (moreRoutes.WithPredicate(ex_enables).Any())
                 {
-                    Triple passToWriter = new Triple(fromStepNameTriple.FirstOrDefault().Object, t.Predicate, toStepNameTriple.FirstOrDefault().Object);
-                    passToWriter.WriteToDotString(builder, GraphVizEdgeType.Enables);
+                    builder.Append("enables\", color = blue");
                 }
+
+                if (moreRoutes.WithPredicate(ex_ledTo).Any())
+                {
+                    builder.Append("led to\"");
+                }
+
+                builder.Append("];");
             }
 
-            IEnumerable<Triple> actualized = g.GetTriplesWithObject(g.CreateUriNode("ex:Actualized"));
-            foreach (Triple t in actualized)
-            {
-                IEnumerable<Triple> actualizedTripleNames = g.GetTriplesWithSubjectPredicate(t.Subject, procedureStepName);
-                if (!actualizedTripleNames.IsNullOrEmpty())
-                {
-                    actualizedTripleNames.ToList().ForEach(triple => triple.WriteToDotString(builder, GraphVizNodeType.Actualized));
-                }
-            }
-
-            IEnumerable<Triple> possible = g.GetTriplesWithObject(g.CreateUriNode("ex:Possible"));
-            foreach (Triple t in possible)
-            {
-                IEnumerable<Triple> possibleTripleNames = g.GetTriplesWithSubjectPredicate(t.Subject, procedureStepName);
-                if (!possibleTripleNames.IsNullOrEmpty())
-                {
-                    possibleTripleNames.ToList().ForEach(triple => triple.WriteToDotString(builder, GraphVizNodeType.Possible));
-                }
-            }
-
-            IEnumerable<Triple> distance = g.GetTriplesWithPredicate(g.CreateUriNode("ex:distance"));
-            List<Triple> distWithStepNames = new List<Triple>();
-            foreach (Triple t in distance)
-            {
-                IEnumerable<Triple> names = g.GetTriplesWithSubjectPredicate(t.Subject, procedureStepName);
-                if (!names.IsNullOrEmpty())
-                {
-                    distWithStepNames.Add(new Triple(names.FirstOrDefault().Object, t.Predicate, t.Object));
-                }
-            }
-
-            //Dictionary<string, List<Triple>> rankDict = distWithStepNames.GroupBy(t => t.Object.ToString()).ToDictionary(group => group.Key, group => group.ToList());
-            //foreach (KeyValuePair<string, List<Triple>> entry in rankDict)
-            //{
-            //    builder.Append($"{{ rank=same; {String.Join(" ", entry.Value.Select(t => t.Subject.ToString().SurroundWithDoubleQuotes()))} }}");
-            //}
-
-            builder.Insert(0, "digraph{");
             builder.Append("}");
 
             return builder.ToString();
+        }
 
+        private Uri Reduce(IUriNode step)
+        {
+            return new Uri("https://id.parliament.uk/").MakeRelativeUri(step.Uri);
         }
 
         [Route("{tripleStoreId}")]

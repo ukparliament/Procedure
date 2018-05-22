@@ -2,51 +2,34 @@
 @model GraphVizViewModel
 <html>
 <head>
+    <script src="//d3js.org/d3.v4.min.js"></script>
+    <script src="https://unpkg.com/viz.js@1.8.0/viz.js" type="javascript/worker"></script>
+    <script src="https://unpkg.com/d3-graphviz@2.1.0/build/d3-graphviz.min.js"></script>
     <style>
         body {
             margin: 0
         }
+
+        svg {
+            width: 100%;
+            height: 100%;
+        }
     </style>
 </head>
 <body>
-    @if (!String.IsNullOrEmpty(Model.DotString))
+    @if (!string.IsNullOrEmpty(Model.DotString))
     {
         Layout = "";
-        <script src="//d3js.org/d3.v4.min.js"></script>
-        <script src="https://unpkg.com/viz.js@1.8.0/viz.js" type="javascript/worker"></script>
-        <script src="https://unpkg.com/d3-graphviz@2.1.0/build/d3-graphviz.min.js"></script>
-        <div id="graph" style="text-align: center"></div>
+
+        <div id="graph"></div>
         <script>
-        var i = "@Model.DotString";
-        var parser = new DOMParser;
-        var dom = parser.parseFromString('<!doctype html><body>' + i, 'text/html');
-        var decodedString = dom.body.textContent;
+            var i = "@Model.DotString";
+            var parser = new DOMParser;
+            var dom = parser.parseFromString('<!doctype html><body>' + i, 'text/html');
+            var decodedString = dom.body.textContent;
 
-        window.addEventListener("resize", onResize);
-
-        function onResize() {
-            d3.select("svg")
-                .attr("width", window.innerWidth)
-                .attr("height", window.innerHeight)
-
-        }
-
-        function attributer(datum, index, nodes) {
-            if (datum.tag == "svg") {
-                datum.attributes.overflow = "visible";
-            }
-        }
-
-        d3.select("#graph").graphviz()
-            .logEvents(true)
-            .attributer(attributer)
-            .renderDot(decodedString, onResize)
-            .on("end", function () {
-                console.log('"end" event');
-            });
-
+            d3.select("#graph").graphviz().renderDot(decodedString);
         </script>
-
     }
     else
     {
@@ -55,7 +38,6 @@
                 <h3>The item cannot be rendered.</h3>
             </div>
         </section>
-
     }
 </body>
 </html>
