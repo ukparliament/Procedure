@@ -97,11 +97,11 @@ namespace Procedure.Web.Controllers
                 }
             }
 
-            Dictionary<string, List<Triple>> rankDict = distWithStepNames.GroupBy(t => t.Object.ToString()).ToDictionary(group => group.Key, group => group.ToList());
-            foreach (KeyValuePair<string, List<Triple>> entry in rankDict)
-            {
-                builder.Append($"{{ rank=same; {String.Join(" ", entry.Value.Select(t => t.Subject.ToString().SurroundWithDoubleQuotes()))} }}");
-            }
+            //Dictionary<string, List<Triple>> rankDict = distWithStepNames.GroupBy(t => t.Object.ToString()).ToDictionary(group => group.Key, group => group.ToList());
+            //foreach (KeyValuePair<string, List<Triple>> entry in rankDict)
+            //{
+            //    builder.Append($"{{ rank=same; {String.Join(" ", entry.Value.Select(t => t.Subject.ToString().SurroundWithDoubleQuotes()))} }}");
+            //}
 
             builder.Append("subgraph cluster_key {" +
                     "label=\"Key\"; labeljust=\"l\" " +
