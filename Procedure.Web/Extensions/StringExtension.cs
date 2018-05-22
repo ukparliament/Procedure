@@ -6,5 +6,11 @@
         {
             return str.Replace("\"", string.Empty).Trim();
         }
+
+        public static string SurroundWithDoubleQuotes(this string str)
+        {
+            return "\"" + str + "\"";
+        }
+
     }
 }
