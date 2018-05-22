@@ -6,6 +6,7 @@
             height: 100%;
             margin: 0;
             display: flex;
+            font-family: monospace
         }
 
         ul {
@@ -15,21 +16,29 @@
             padding: 0;
             list-style-type: none;
             flex-shrink: 0;
-            border-right: 2px  dashed;
+            border-right: 2px dashed;
         }
 
         li {
             margin: 10px;
         }
 
-        span {
-            font-family: monospace
-        }
-
         iframe {
             min-width: 0;
             height: 100%;
             flex-grow: 1;
+        }
+
+        #progress {
+            display: none;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100%;
+            text-align: center;
+            padding: 20px;
+            background-color: black;
+            color: white;
         }
     </style>
     <script>
@@ -44,6 +53,10 @@ WHERE { ?package a :WorkPackage; :workPackageHasBusinessItem ?item . }
         window.addEventListener("load", onLoad);
 
         function onLoad() {
+            document.getElementById("viewer").addEventListener("load", log.bind(undefined, undefined));
+
+            log("Package list loading");
+
             let encodedQuery = encodeURI(packagesQuery);
             let url = urlTemplate + encodedQuery;
             var options = {
@@ -57,15 +70,26 @@ WHERE { ?package a :WorkPackage; :workPackageHasBusinessItem ?item . }
                 .then(json => render(json.results.bindings.map(binding => binding.package.value)));
         }
 
-        function render(data) {
-            document.querySelector("ul").children[0].remove();
+        function log(message) {
+            let progress = document.getElementById("progress");
 
+            if (message === undefined) {
+                progress.style.display = "none";
+            } else {
+                progress.innerText = message;
+                progress.style.display = "block";
+            }
+        }
+
+        function render(data) {
             data.map(createViewerLinkItem).forEach(appendItem);
+
+            log();
         }
 
         function createViewerLinkItem(id) {
             let itemElement = document.createElement("li");
-            let linksElement = createViewerLinks(id);
+            let linksElement = createViewerLinks(id.substring(25));
             itemElement.appendChild(linksElement);
 
             return itemElement;
@@ -76,31 +100,34 @@ WHERE { ?package a :WorkPackage; :workPackageHasBusinessItem ?item . }
 
             let linksElement = document.createElement("span");
 
-            linksElement.appendChild(document.createTextNode(id.substring(25)));
+            linksElement.appendChild(document.createTextNode(id));
             linksElement.appendChild(document.createTextNode(" "));
 
-            let htmlElement = document.createElement("a");
-            linksElement.appendChild(htmlElement);
+            linksElement.appendChild(createLink(url, "viewer", "html"));
             linksElement.appendChild(document.createTextNode(" "));
-            htmlElement.href = url;
-            htmlElement.target = "viewer";
-            htmlElement.text = ("html");
 
-            let twoDElement = document.createElement("a");
-            linksElement.appendChild(twoDElement);
+            linksElement.appendChild(createLink("2d/?" + Math.random().toString() + "#" + url, "viewer", "2D"));
             linksElement.appendChild(document.createTextNode(" "));
-            twoDElement.href = "2d/?" + Math.random().toString() + "#" + url;
-            twoDElement.target = "viewer";
-            twoDElement.text = ("2D");
 
-            let threeDElement = document.createElement("a");
-            linksElement.appendChild(threeDElement);
+            linksElement.appendChild(createLink("?" + Math.random().toString() + "#" + url, "viewer", "3D"));
             linksElement.appendChild(document.createTextNode(" "));
-            threeDElement.href = "?" + Math.random().toString() + "#" + url;
-            threeDElement.target = "viewer";
-            threeDElement.text = ("3D");
+
+            linksElement.appendChild(createLink("//procedures.azurewebsites.net/workpackagesgraphviz/" + id, "viewer", "flowchart"));
+            linksElement.appendChild(document.createTextNode(" "));
+
 
             return linksElement;
+        }
+
+        function createLink(href, target, text) {
+            let linkElement = document.createElement("a");
+            linkElement.href = href;
+            linkElement.target = target;
+            linkElement.text = text;
+
+            linkElement.addEventListener("click", log.bind(undefined, "Loading " + href));
+
+            return linkElement;
         }
 
         function appendItem(item) {
@@ -109,9 +136,8 @@ WHERE { ?package a :WorkPackage; :workPackageHasBusinessItem ?item . }
     </script>
 </head>
 <body>
-    <ul>
-        <li>Package list loading</li>
-    </ul>
-    <iframe frameborder="0" name="viewer"></iframe>
+    <div id="progress"></div>
+    <ul></ul>
+    <iframe id="viewer" frameborder="0" name="viewer"></iframe>
 </body>
 </html>
