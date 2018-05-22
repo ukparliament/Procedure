@@ -3,6 +3,7 @@ using Procedure.Web.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Web.Mvc;
 using VDS.RDF;
@@ -24,6 +25,14 @@ namespace Procedure.Web.Controllers
         [HttpPost, Route]
         public ActionResult Index(string inputString)
         {
+            string dotString = ConvertRDFToDotString(inputString);
+            TempData["StringFromRedirect"] = dotString;
+
+            return RedirectToAction("GraphViz");
+        }
+
+        public string ConvertRDFToDotString(string inputString)
+        {
             IGraph g = new Graph();
             try
             {
@@ -31,8 +40,7 @@ namespace Procedure.Web.Controllers
             }
             catch (Exception e)
             {
-                TempData["StringFromRedirect"] = e.Message;
-                return RedirectToAction("GraphViz");
+                return e.Message;
             }
 
             StringBuilder builder = new StringBuilder("graph [fontname = \"calibri\"]; node[fontname = \"calibri\"]; edge[fontname = \"calibri\"];");
@@ -42,7 +50,7 @@ namespace Procedure.Web.Controllers
 
             INode procedureStepName = g.CreateUriNode("parl:procedureStepName");
 
-            IEnumerable<Triple> canLeadToTriples = g.GetTriplesWithPredicate(g.CreateUriNode("ex:CANLEADTO"));
+            IEnumerable<Triple> canLeadToTriples = g.GetTriplesWithPredicate(g.CreateUriNode("ex:canLeadTo"));
             foreach (Triple t in canLeadToTriples)
             {
                 IEnumerable<Triple> fromStepNameTriple = g.GetTriplesWithSubjectPredicate(t.Subject, procedureStepName);
@@ -54,7 +62,7 @@ namespace Procedure.Web.Controllers
                 }
             }
 
-            IEnumerable<Triple> canEnablesTriples = g.GetTriplesWithPredicate(g.CreateUriNode("ex:ENABLES"));
+            IEnumerable<Triple> canEnablesTriples = g.GetTriplesWithPredicate(g.CreateUriNode("ex:enables"));
             foreach (Triple t in canEnablesTriples)
             {
                 IEnumerable<Triple> fromStepNameTriple = g.GetTriplesWithSubjectPredicate(t.Subject, procedureStepName);
@@ -66,7 +74,7 @@ namespace Procedure.Web.Controllers
                 }
             }
 
-            IEnumerable<Triple> actualized = g.GetTriplesWithObject(g.CreateUriNode("ex:ACTUALIZED"));
+            IEnumerable<Triple> actualized = g.GetTriplesWithObject(g.CreateUriNode("ex:Actualized"));
             foreach (Triple t in actualized)
             {
                 IEnumerable<Triple> actualizedTripleNames = g.GetTriplesWithSubjectPredicate(t.Subject, procedureStepName);
@@ -76,7 +84,7 @@ namespace Procedure.Web.Controllers
                 }
             }
 
-            IEnumerable<Triple> possible = g.GetTriplesWithObject(g.CreateUriNode("ex:POSSIBLE"));
+            IEnumerable<Triple> possible = g.GetTriplesWithObject(g.CreateUriNode("ex:Possible"));
             foreach (Triple t in possible)
             {
                 IEnumerable<Triple> possibleTripleNames = g.GetTriplesWithSubjectPredicate(t.Subject, procedureStepName);
@@ -86,12 +94,12 @@ namespace Procedure.Web.Controllers
                 }
             }
 
-            IEnumerable<Triple> distance = g.GetTriplesWithPredicate(g.CreateUriNode("ex:DISTANCE"));
+            IEnumerable<Triple> distance = g.GetTriplesWithPredicate(g.CreateUriNode("ex:distance"));
             List<Triple> distWithStepNames = new List<Triple>();
             foreach (Triple t in distance)
             {
                 IEnumerable<Triple> names = g.GetTriplesWithSubjectPredicate(t.Subject, procedureStepName);
-                if(!names.IsNullOrEmpty())
+                if (!names.IsNullOrEmpty())
                 {
                     distWithStepNames.Add(new Triple(names.FirstOrDefault().Object, t.Predicate, t.Object));
                 }
@@ -118,9 +126,36 @@ namespace Procedure.Web.Controllers
             builder.Insert(0, "digraph{");
             builder.Append("}");
 
-            TempData["StringFromRedirect"] = builder.ToString();
+            return builder.ToString();
 
-            return RedirectToAction("GraphViz");
+        }
+
+        [Route("{tripleStoreId}")]
+        public ActionResult GraphViz(string tripleStoreId)
+        {
+            string workPackageResponse = null;
+            try
+            {
+                using (HttpClient client = new HttpClient())
+                {
+                    workPackageResponse = client.GetStringAsync($"https://api.parliament.uk/staging/fixed-query/work_package_by_id?work_package_id=https://id.parliament.uk/{tripleStoreId}").Result;
+                }
+            }
+            catch
+            {
+                workPackageResponse = "";
+            }
+
+            GraphVizViewModel viewmodel = new GraphVizViewModel();
+            if (!workPackageResponse.IsNullOrEmpty())
+            {
+                viewmodel.DotString = ConvertRDFToDotString(workPackageResponse);
+            }
+            else
+            {
+                viewmodel.DotString = "";
+            }
+            return View(viewmodel);
         }
 
         private SparqlResultSet getNameFromGraph(SparqlQueryParser parser, INode stepNode, string predicateForName, IGraph g)
@@ -135,7 +170,7 @@ namespace Procedure.Web.Controllers
             return (SparqlResultSet)g.ExecuteQuery(check);
         }
 
-        [Route("generate")]
+        [Route("generated")]
         public ActionResult GraphViz()
         {
             GraphVizViewModel viewmodel = new GraphVizViewModel();

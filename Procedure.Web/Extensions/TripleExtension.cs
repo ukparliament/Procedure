@@ -23,11 +23,11 @@ namespace Procedure.Web.Extensions
         {
             if (edgeType == GraphVizEdgeType.CanLeadTo)
             {
-                stringBuilder.Append($"\"{triple.Subject.ToString()}\" -> \"{triple.Object.ToString()}\" [label = \"Can Lead to\"];"); 
+                stringBuilder.Append($"\"{triple.Subject.ToString()}\" -> \"{triple.Object.ToString()}\" [label = \"Led to\"];"); 
             }
             if (edgeType == GraphVizEdgeType.Enables)
             {
-                stringBuilder.Append($"edge [color=blue];\"{triple.Subject.ToString()}\" -> \"{triple.Object.ToString()}\" [label = \"Enables\"]; edge [color=black];");
+                stringBuilder.Replace($"\"{triple.Subject.ToString()}\" -> \"{triple.Object.ToString()}\" [label = \"Led to\"];", $"edge [color=blue];\"{triple.Subject.ToString()}\" -> \"{triple.Object.ToString()}\" [label = \"Enables\"]; edge [color=black];");
             }
 
         }

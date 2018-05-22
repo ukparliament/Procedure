@@ -4,9 +4,11 @@
             <h2>Turn RDF into GraphViz</h2>
         </div>
         <form method="POST">
-            <textarea rows=10 cols=60 type="text" placeholder="RDF here please" name="inputString"></textarea>
+            <textarea rows=10 cols=60 type="text" placeholder="RDF here please (e.g. in n-triples/ turtle format)" name="inputString"></textarea>
             <input type="submit" />
         </form>
+        <p>You can also view a GraphViz version of a work package by pasting the 8-letter triplestore ID at the end of the URL, e.g. <a href="http://procedures.azurewebsites.net/workpackagesgraphviz/19IAJ9uj">http://procedures.azurewebsites.net/workpackagesgraphviz/19IAJ9uj</a>.<p>
+        <p>This reflects the data available from the Staging APIs after ETL, e.g. <a href="https://api.parliament.uk/staging/fixed-query/work_package_by_id?work_package_id=19IAJ9uj" target="_blank">https://api.parliament.uk/staging/fixed-query/work_package_by_id?work_package_id=19IAJ9uj</a>.
     </div>
 
 </section>
