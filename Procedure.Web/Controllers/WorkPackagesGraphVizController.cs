@@ -1,7 +1,6 @@
 ﻿using Procedure.Web.Extensions;
 using Procedure.Web.Models;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -114,7 +113,7 @@ namespace Procedure.Web.Controllers
             }
             catch
             {
-                workPackageResponse = "";
+                workPackageResponse = string.Empty;
             }
 
             GraphVizViewModel viewmodel = new GraphVizViewModel();
@@ -124,21 +123,9 @@ namespace Procedure.Web.Controllers
             }
             else
             {
-                viewmodel.DotString = "";
+                viewmodel.DotString = string.Empty;
             }
             return View(viewmodel);
-        }
-
-        private SparqlResultSet getNameFromGraph(SparqlQueryParser parser, INode stepNode, string predicateForName, IGraph g)
-        {
-            SparqlQuery getStepName = parser.ParseFromString($"PREFIX : <https://id.parliament.uk/schema/> SELECT ?stepName WHERE {{<{stepNode.ToString()}> :{predicateForName} ?stepName. }}");
-            return (SparqlResultSet)g.ExecuteQuery(getStepName);
-        }
-
-        private SparqlResultSet checkIfActualized(SparqlQueryParser parser, INode stepNode, IGraph g)
-        {
-            SparqlQuery check = parser.ParseFromString($"PREFIX : <https://id.parliament.uk/schema/> ASK {{?bi :businessItemHasProcedureStep <{stepNode.ToString()}>.}}");
-            return (SparqlResultSet)g.ExecuteQuery(check);
         }
 
         [Route("generated")]
@@ -152,7 +139,7 @@ namespace Procedure.Web.Controllers
                 {
                     viewmodel.DotString = q;
                 }
-                else viewmodel.DotString = "";
+                else viewmodel.DotString = string.Empty;
 
                 return View(viewmodel);
             }
