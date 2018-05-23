@@ -21,7 +21,8 @@
             @foreach (WorkPackageItem workPackage in Model.OrderBy(p => p.Title))
             {
             <li>
-                @Html.ActionLink(workPackage.Title, "Details", "WorkPackages", new { id = workPackage.Id }, new { })
+                @Html.ActionLink(workPackage.Title, "Details", "WorkPackages", new { id = workPackage.Id }, new { }) &nbsp;
+                <label> @workPackage.SubjectTo.Value</label>
             </li>
             }
         </ul>
