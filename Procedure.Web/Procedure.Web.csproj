@@ -164,7 +164,6 @@
     <Compile Include="Controllers\WorkPackagesGraphVizController.cs" />
     <Compile Include="Extensions\IEnumerableExtension.cs" />
     <Compile Include="Extensions\StringExtension.cs" />
-    <Compile Include="Extensions\TripleExtension.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

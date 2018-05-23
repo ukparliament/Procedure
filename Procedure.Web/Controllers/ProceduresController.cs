@@ -4,7 +4,6 @@ using GraphVizWrapper.Queries;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Procedure.Web.Models;
-using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
@@ -18,7 +17,6 @@ using VDS.RDF.Query;
 using VDS.RDF.Parsing;
 using System.IO;
 using System.Xml;
-using System.Text.RegularExpressions;
 using Procedure.Web.Extensions;
 
 namespace Procedure.Web.Controllers
@@ -96,19 +94,19 @@ namespace Procedure.Web.Controllers
                 {
                     if (route.RouteKind == RouteType.Causes)
                     {
-                        builder.Append($"\"{route.FromStep.Value.RemoveQuotesAndTrim()}\"->\"{route.ToStep.Value.RemoveQuotesAndTrim()}\"[label=\"Causes\"]; ");
+                        builder.Append($"\"{route.FromStep.Value.ProcessName()}\"->\"{route.ToStep.Value.ProcessName()}\"[label=\"Causes\"]; ");
                     }
                     if (route.RouteKind == RouteType.Allows)
                     {
-                        builder.Append($"edge [color=red];\"{route.FromStep.Value.RemoveQuotesAndTrim()}\"->\"{route.ToStep.Value.RemoveQuotesAndTrim()}\"[label=\"Allows\"];edge[color=black];");
+                        builder.Append($"edge [color=red];\"{route.FromStep.Value.ProcessName()}\"->\"{route.ToStep.Value.ProcessName()}\"[label=\"Allows\"];edge[color=black];");
                     }
                     if (route.RouteKind == RouteType.Precludes)
                     {
-                        builder.Append($"edge [color=blue];\"{route.FromStep.Value.RemoveQuotesAndTrim()}\"->\"{route.ToStep.Value.RemoveQuotesAndTrim()}\"[label=\"Precludes\"];edge[color=black];");
+                        builder.Append($"edge [color=blue];\"{route.FromStep.Value.ProcessName()}\"->\"{route.ToStep.Value.ProcessName()}\"[label=\"Precludes\"];edge[color=black];");
                     }
                     if (route.RouteKind == RouteType.Requires)
                     {
-                        builder.Append($"edge [color=yellow];\"{route.FromStep.Value.RemoveQuotesAndTrim()}\"->\"{route.ToStep.Value.RemoveQuotesAndTrim()}\"[label=\"Requires\"];edge[color=black];");
+                        builder.Append($"edge [color=yellow];\"{route.FromStep.Value.ProcessName()}\"->\"{route.ToStep.Value.ProcessName()}\"[label=\"Requires\"];edge[color=black];");
                     }
                 }
 
@@ -132,7 +130,7 @@ namespace Procedure.Web.Controllers
             }
             else
             {
-                return "";
+                return string.Empty;
             }
 
             

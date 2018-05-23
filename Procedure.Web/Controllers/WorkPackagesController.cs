@@ -87,6 +87,7 @@ namespace Procedure.Web.Controllers
                 JObject jsonRoute = (JObject)JsonConvert.DeserializeObject(routeResponse);
                 List<RouteItem> routes = ((JArray)jsonRoute.SelectToken("value")).ToObject<List<RouteItem>>();
                 List<RouteItem> routesWithActualizedFromSteps = routes.Where(route => actualizedStepIds.Contains(route.FromStep.Id)).ToList();
+                List<RouteItem> routesWithActualizedToSteps = routes.Where(route => actualizedStepIds.Contains(route.ToStep.Id)).ToList();
 
                 List<RouteItem> nonSelfReferencedRoutesWithBothEndsActualized = routesWithActualizedFromSteps.Where(route => actualizedStepIds.Contains(route.ToStep.Id) && actualizedStepIds.Contains(route.FromStep.Id) && route.FromStep.Id != route.ToStep.Id).ToList();
                 List<RouteItem> precludeOrRequireRoutes = routes.Where(route => route.RouteKind == RouteType.Precludes || route.RouteKind == RouteType.Requires).ToList();
@@ -99,7 +100,7 @@ namespace Procedure.Web.Controllers
                 int[] blackOutFromStepIds = nonSelfReferencedRoutesWithBothEndsActualized.Select(r => r.FromStep.Id).ToArray();
                 int[] blackOutToStepsIds = routesWithActualizedFromSteps.Where(r => r.RouteKind == RouteType.Precludes).Select(r => r.ToStep.Id).ToArray();
 
-                IEnumerable<int> unBlackOut = routes.Except(precludeOrRequireRoutes).GroupBy(r => r.FromStep.Id).Select(group => new { fromStep = group.Key, routeCount = group.Count()}).Where(g => g.routeCount > 1).Select(g => g.fromStep);
+                IEnumerable<int> unBlackOut = routes.Except(precludeOrRequireRoutes).Except(routesWithActualizedToSteps).GroupBy(r => r.FromStep.Id).Select(group => new { fromStep = group.Key, routeCount = group.Count()}).Where(g => g.routeCount >= 1).Select(g => g.fromStep);
 
                 StringBuilder builder = new StringBuilder("graph [fontname = \"calibri\"]; node[fontname = \"calibri\"]; edge[fontname = \"calibri\"];");
 
@@ -109,36 +110,36 @@ namespace Procedure.Web.Controllers
                     {
                         if (route.RouteKind == RouteType.Causes)
                         {
-                            builder.Append($"\"{route.FromStep.Value.RemoveQuotesAndTrim()}\" -> \"{route.ToStep.Value.RemoveQuotesAndTrim()}\" [label = \"Causes\"]; ");
+                            builder.Append($"\"{route.FromStep.Value.ProcessName()}\" -> \"{route.ToStep.Value.ProcessName()}\" [label = \"Causes\"]; ");
                         }
                         if (route.RouteKind == RouteType.Allows)
                         {
-                            builder.Append($"edge [color=red]; \"{route.FromStep.Value.RemoveQuotesAndTrim()}\" -> \"{route.ToStep.Value.RemoveQuotesAndTrim()}\" [label = \"Allows\"]; edge [color=black];");
+                            builder.Append($"edge [color=red]; \"{route.FromStep.Value.ProcessName()}\" -> \"{route.ToStep.Value.ProcessName()}\" [label = \"Allows\"]; edge [color=black];");
                         }
                         if (route.RouteKind == RouteType.Precludes)
                         {
-                            builder.Append($"edge [color=blue]; \"{route.FromStep.Value.RemoveQuotesAndTrim()}\" -> \"{route.ToStep.Value.RemoveQuotesAndTrim()}\" [label = \"Precludes\"]; edge [color=black];");
+                            builder.Append($"edge [color=blue]; \"{route.FromStep.Value.ProcessName()}\" -> \"{route.ToStep.Value.ProcessName()}\" [label = \"Precludes\"]; edge [color=black];");
                         }
                         if (route.RouteKind == RouteType.Requires)
                         {
-                            builder.Append($"edge [color=yellow]; \"{route.FromStep.Value.RemoveQuotesAndTrim()}\" -> \"{route.ToStep.Value.RemoveQuotesAndTrim()}\" [label = \"Requires\"]; edge [color=black];");
+                            builder.Append($"edge [color=yellow]; \"{route.FromStep.Value.ProcessName()}\" -> \"{route.ToStep.Value.ProcessName()}\" [label = \"Requires\"]; edge [color=black];");
                         }
                     }
                     if (!blackOutFromStepIds.Except(unBlackOut).Contains(route.FromStep.Id) && !blackOutToStepsIds.Contains(route.ToStep.Id) && !new[] { RouteType.Precludes, RouteType.Requires }.Contains(route.RouteKind))
                     {
-                        builder.Append($"\"{route.ToStep.Value.RemoveQuotesAndTrim()}\" [style=filled,fillcolor=white,color=orange,peripheries=2];");
+                        builder.Append($"\"{route.ToStep.Value.ProcessName()}\" [style=filled,fillcolor=white,color=orange,peripheries=2];");
                     }
                     if (actualizedStepIds.Contains(route.FromStep.Id))
                     {
-                        builder.Append($"\"{route.FromStep.Value.RemoveQuotesAndTrim()}\" [style=filled,color=gray];");
+                        builder.Append($"\"{route.FromStep.Value.ProcessName()}\" [style=filled,color=gray];");
                     }
                     if (actualizedStepIds.Contains(route.FromStep.Id) && canActualizeSelfAgainStepIds.Contains(route.FromStep.Id))
                     {
-                        builder.Replace($"\"{route.FromStep.Value.RemoveQuotesAndTrim()}\" [style=filled,color=gray];", $"\"{route.FromStep.Value.RemoveQuotesAndTrim()}\" [style=filled,color=lemonchiffon2];");
+                        builder.Replace($"\"{route.FromStep.Value.ProcessName()}\" [style=filled,color=gray];", $"\"{route.FromStep.Value.ProcessName()}\" [style=filled,color=lemonchiffon2];");
                     }
                     if (actualizedStepIds.Contains(route.ToStep.Id) && canActualizeSelfAgainStepIds.Contains(route.ToStep.Id))
                     {
-                        builder.Replace($"\"{route.ToStep.Value.RemoveQuotesAndTrim()}\" [style=filled,fillcolor=white,color=orange,peripheries=2];", $"\"{route.FromStep.Value.RemoveQuotesAndTrim()}\" [style=filled,color=lemonchiffon2];");
+                        builder.Replace($"\"{route.ToStep.Value.ProcessName()}\" [style=filled,fillcolor=white,color=orange,peripheries=2];", $"\"{route.FromStep.Value.ProcessName()}\" [style=filled,color=lemonchiffon2];");
                     }
                 }
 
