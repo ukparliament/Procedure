@@ -6,8 +6,6 @@ using System.Net.Http;
 using System.Text;
 using System.Web.Mvc;
 using VDS.RDF;
-using VDS.RDF.Parsing;
-using VDS.RDF.Query;
 
 namespace Procedure.Web.Controllers
 {
