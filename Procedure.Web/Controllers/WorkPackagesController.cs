@@ -39,26 +39,18 @@ namespace Procedure.Web.Controllers
         public ActionResult GraphViz(int id)
         {
             GraphVizViewModel viewmodel = new GraphVizViewModel();
-            viewmodel.DotString = GiveMeDotString(id);
+            viewmodel.DotString = GiveMeDotString(id, showLegend:true);
 
             return View(viewmodel);
         }
 
         [Route("{id:int}/graph.dot")]
-        public ActionResult GraphDot(int id)
+        public ContentResult GraphDot(int id)
         {
-            var getStartProcessQuery = new GetStartProcessQuery();
-            var getProcessStartInfoQuery = new GetProcessStartInfoQuery();
-            var registerLayoutPluginCommand = new RegisterLayoutPluginCommand(getProcessStartInfoQuery, getStartProcessQuery);
-            var wrapper = new GraphGeneration(getStartProcessQuery,
-                                              getProcessStartInfoQuery,
-                                              registerLayoutPluginCommand);
-
-            byte[] output = wrapper.GenerateGraph(GiveMeDotString(id), Enums.GraphReturnType.Plain);
-            return File(output, "text/plain");
+            return Content(GiveMeDotString(id, showLegend:false), "text/plain");
         }
 
-        private string GiveMeDotString(int workPackageId)
+        private string GiveMeDotString(int workPackageId, bool showLegend)
         {
             WorkPackageItem workPackage = fetchWorkPackageFromSharepoint(workPackageId);
             if (workPackage.Id != 0)
@@ -143,9 +135,9 @@ namespace Procedure.Web.Controllers
                     }
                 }
 
-
-                // Add a legend
-                builder.Append("subgraph cluster_key {" +
+                if(showLegend == true)
+                {
+                    builder.Append("subgraph cluster_key {" +
                     "label=\"Key\"; labeljust=\"l\" " +
                     "k1[label=\"Actualised step\", style=filled, color=gray]" +
                     "k2[label=\"Actualised step that can be actualised again\", style=filled, color=lemonchiffon2]" +
@@ -158,6 +150,7 @@ namespace Procedure.Web.Controllers
                     "ktabledest [label =<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\">" +
                     "<tr><td port=\"i1\" > &nbsp;</td></tr> <tr><td port=\"i2\"> &nbsp;</td></tr> <tr><td port=\"i3\"> &nbsp;</td></tr> <tr><td port=\"i4\"> &nbsp;</td></tr> </table>>];" +
                     "ktable:i1:e->ktabledest:i1:w ktable:i2:e->ktabledest:i2:w [color=red] ktable:i3:e->ktabledest:i3:w [color = blue] ktable:i4:e->ktabledest:i4:w [color = yellow] {rank = sink; k1 k2 k3}  { rank = same; ktable ktabledest } };");
+                }
 
                 builder.Insert(0, "digraph{");
                 builder.Append("}");

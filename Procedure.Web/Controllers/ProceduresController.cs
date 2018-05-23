@@ -57,27 +57,19 @@ namespace Procedure.Web.Controllers
         public ActionResult GraphViz(int id)
         {
             GraphVizViewModel viewmodel = new GraphVizViewModel();
-            viewmodel.DotString = GiveMeDotString(id);
+            viewmodel.DotString = GiveMeDotString(id, showLegend:true);
 
             return View(viewmodel);
         }
 
         // Return graph in DOT string
         [Route("{id:int}/graph.dot")]
-        public ActionResult GraphDot(int id)
+        public ContentResult GraphDot(int id)
         {
-            var getStartProcessQuery = new GetStartProcessQuery();
-            var getProcessStartInfoQuery = new GetProcessStartInfoQuery();
-            var registerLayoutPluginCommand = new RegisterLayoutPluginCommand(getProcessStartInfoQuery, getStartProcessQuery);
-            var wrapper = new GraphGeneration(getStartProcessQuery,
-                                              getProcessStartInfoQuery,
-                                              registerLayoutPluginCommand);
-
-            byte[] output = wrapper.GenerateGraph(GiveMeDotString(id), Enums.GraphReturnType.Plain);
-            return File(output, "text/plain");
+            return Content(GiveMeDotString(id, showLegend:false), "text/plain");
         }
 
-        private string GiveMeDotString(int procedureId)
+        private string GiveMeDotString(int procedureId, bool showLegend)
         {
             string routeResponse = null;
             using (HttpResponseMessage responseMessage = GetList(ProcedureRouteListId, filter: $"Procedure/ID eq {procedureId}"))
@@ -110,18 +102,20 @@ namespace Procedure.Web.Controllers
                     }
                 }
 
-                // Add a legend
-                builder.Append("subgraph cluster_key {" +
-                    "label=\"Key\"; labeljust=\"l\";" +
-                    "k1[label=\"Step\"]; node [shape=plaintext];" +
-                    "k3[label=<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\"> " +
-                    "<tr><td align=\"right\" port=\"i1\"> Causes </td></tr>" +
-                    "<tr><td align=\"right\" port=\"i2\"> Allows </td></tr>" +
-                    "<tr><td align=\"right\" port=\"i3\"> Precludes </td></tr>" +
-                    "<tr><td align=\"right\" port=\"i4\"> Requires </td></tr> </table>>];" +
-                    "k3e [label =<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\">" +
-                    "<tr><td port=\"i1\" > &nbsp;</td></tr> <tr><td port=\"i2\"> &nbsp;</td></tr> <tr><td port=\"i3\"> &nbsp;</td></tr> <tr><td port=\"i4\"> &nbsp;</td></tr> </table>>];" +
-                    "k3:i1:e->k3e:i1:w k3:i2:e-> k3e:i2:w [color=red] k3:i3:e->k3e:i3:w [color = blue] k3:i4:e->k3e:i4:w [color=yellow]  { rank = same; k3 k3e k1 } };");
+                if(showLegend == false)
+                {
+                    builder.Append("subgraph cluster_key {" +
+                   "label=\"Key\"; labeljust=\"l\";" +
+                   "k1[label=\"Step\"]; node [shape=plaintext];" +
+                   "k3[label=<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\"> " +
+                   "<tr><td align=\"right\" port=\"i1\"> Causes </td></tr>" +
+                   "<tr><td align=\"right\" port=\"i2\"> Allows </td></tr>" +
+                   "<tr><td align=\"right\" port=\"i3\"> Precludes </td></tr>" +
+                   "<tr><td align=\"right\" port=\"i4\"> Requires </td></tr> </table>>];" +
+                   "k3e [label =<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\">" +
+                   "<tr><td port=\"i1\" > &nbsp;</td></tr> <tr><td port=\"i2\"> &nbsp;</td></tr> <tr><td port=\"i3\"> &nbsp;</td></tr> <tr><td port=\"i4\"> &nbsp;</td></tr> </table>>];" +
+                   "k3:i1:e->k3e:i1:w k3:i2:e-> k3e:i2:w [color=red] k3:i3:e->k3e:i3:w [color = blue] k3:i4:e->k3e:i4:w [color=yellow]  { rank = same; k3 k3e k1 } };");
+                }
 
                 builder.Insert(0, "digraph{");
                 builder.Append("}");
