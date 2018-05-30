@@ -37,6 +37,11 @@
                         <dt>Coming into force note</dt>
                         <dd>@Model.WorkPackage.ComingIntoForceNote</dd>
                     }
+                    @if (Model.WorkPackage.WorkPackagableThingType != null)
+                    {
+                        <dt>Work Packagable Thing Type</dt>
+                        <dd>@Model.WorkPackage.WorkPackagableThingType.Value</dd>
+                    }
                     @if (!String.IsNullOrEmpty(Model.WorkPackage.WorkPackageableThingURL))
                     {
                         <dt>Work Packagable Thing URL</dt>
