@@ -24,6 +24,7 @@ namespace Procedure.Web.Controllers
             if (workPackage.Id != 0)
             {
                 viewModel.WorkPackage = workPackage;
+                viewModel.BusinessItems = getAllBusinessItems(id);
                 viewModel.Tree = giveMeTheTree(id, viewModel.WorkPackage.SubjectTo.Id);
             }
 

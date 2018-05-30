@@ -166,8 +166,6 @@
     </Compile>
     <Compile Include="Models\BaseSharepointItem.cs" />
     <Compile Include="Models\BusinessItem.cs" />
-    <Compile Include="Models\GraphVizEdgeType.cs" />
-    <Compile Include="Models\GraphVizNodeType.cs" />
     <Compile Include="Models\GraphVizViewModel.cs" />
     <Compile Include="Models\ListRequestObject.cs" />
     <Compile Include="Models\ProcedureDetailViewModel.cs" />

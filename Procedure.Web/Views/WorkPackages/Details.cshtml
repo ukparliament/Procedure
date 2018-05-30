@@ -19,23 +19,90 @@
 
     <section>
         <div class="container">
-            @if (!Model.Tree.IsNullOrEmpty())
-            {
-                Html.RenderPartial("DetailsRoute", Model.Tree);
-            }
-            else
-            {
-                <p> No tree shown because there are no business items or no entry steps (e.g. SI exists) have been defined.</p>
-            }
-        </div>
-    </section>
-}
-else
-{
-    <section>
-        <div class="container">
-            <h3>The item does not exist or has been deleted.</h3>
-        </div>
-    </section>
+            <div class="block--border__bottom">
+                @if (Model.BusinessItems.Any())
+                {
+                    <h3>Has following business items</h3>
+                    <ul class="list--details">
+                        @foreach (BusinessItem businessItem in Model.BusinessItems.OrderByDescending(p => p.Date))
+                        {
+                            <li class="block--transparent">
+                                @if (businessItem.ActualisesProcedureStep != null)
+                                {
+                                    foreach (SharepointLookupItem procedureStep in businessItem.ActualisesProcedureStep)
+                                    {
+                                        <nobr>
+                                            <p>@Html.ActionLink(procedureStep.Value, "Details", "Steps", new { id = procedureStep.Id }, new { })</p>
+                                        </nobr>
+                                    }
+                                }
+                                @if (businessItem.Date != null)
+                                {
+                                    <nobr>
+                                        <p>Actualized on: @businessItem.Date.ToShortDateString() (@businessItem.Date.DayOfWeek)</p>
+                                    </nobr>
+                                }
+                                @if (businessItem.Weblink != null)
+                                {
+                                    <a href="@businessItem.Weblink">@businessItem.Weblink</a>
+                                }
+                                @if (businessItem.LayingBody != null)
+                                {
+                                    <nobr>
+                                        <p>Laying body: @businessItem.LayingBody.Value</p>
+                                    </nobr>
+                                }
 
-}
+                                @if (businessItem.BelongsTo.Count > 1)
+                                {
+                                    <nobr>
+                                        <p>This business item also belongs to:</p>
+                                    </nobr>
+                                        <div>
+                                            <ul class="list--details">
+                                                @foreach (SharepointLookupItem workPackage in businessItem.BelongsTo)
+                                                {
+                                                    if (workPackage.Id != Model.WorkPackage.Id)
+                                                    {
+                                                        <li class="block--transparent">@Html.ActionLink(workPackage.Value, "Details", "WorkPackages", new { id = workPackage.Id }, new { })</li>
+                                                    }
+                                                }
+                                            </ul>
+                                        </div>
+                                        }
+
+                                </li>
+                            }
+                            </ul>
+                        }
+                        else
+                        {
+                        <h3>Not actualised by any business item</h3>
+                        }
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div class="container">
+                    <h3>Has following procedure tree</h3>
+                    @if (!Model.Tree.IsNullOrEmpty())
+                    {
+                        Html.RenderPartial("DetailsRoute", Model.Tree);
+                    }
+                    else
+                    {
+                        <p> No tree shown because there are no business items or no entry steps (e.g. SI exists) have been defined.</p>
+                    }
+                </div>
+            </section>
+        }
+        else
+        {
+            <section>
+                <div class="container">
+                    <h3>The item does not exist or has been deleted.</h3>
+                </div>
+            </section>
+
+        }
