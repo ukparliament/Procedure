@@ -31,16 +31,12 @@
                                 {
                                     foreach (SharepointLookupItem procedureStep in businessItem.ActualisesProcedureStep)
                                     {
-                                        <nobr>
-                                            <p>@Html.ActionLink(procedureStep.Value, "Details", "Steps", new { id = procedureStep.Id }, new { })</p>
-                                        </nobr>
+                                        <span><p>@Html.ActionLink(procedureStep.Value, "Details", "Steps", new { id = procedureStep.Id }, new { })</p></span>
                                     }
                                 }
                                 @if (businessItem.Date != null)
                                 {
-                                    <nobr>
-                                        <p>Actualized on: @businessItem.Date.ToShortDateString() (@businessItem.Date.DayOfWeek)</p>
-                                    </nobr>
+                                    <span><p>Actualized on: @businessItem.Date.ToShortDateString() (@businessItem.Date.DayOfWeek)</p></span>
                                 }
                                 @if (businessItem.Weblink != null)
                                 {
@@ -48,16 +44,12 @@
                                 }
                                 @if (businessItem.LayingBody != null)
                                 {
-                                    <nobr>
-                                        <p>Laying body: @businessItem.LayingBody.Value</p>
-                                    </nobr>
+                                    <span><p>Laying body: @businessItem.LayingBody.Value</p></span>
                                 }
 
                                 @if (businessItem.BelongsTo.Count > 1)
                                 {
-                                    <nobr>
-                                        <p>This business item also belongs to:</p>
-                                    </nobr>
+                                    <span><p>This business item also belongs to:</p></span>
                                         <div>
                                             <ul class="list--details">
                                                 @foreach (SharepointLookupItem workPackage in businessItem.BelongsTo)
