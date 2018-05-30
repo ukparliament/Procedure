@@ -118,5 +118,43 @@ namespace Procedure.Web.Controllers
             return result;
         }
 
+        protected WorkPackageItem getWorkPackage(int id)
+        {
+            string workPackageResponse = null;
+            using (HttpResponseMessage responseMessage = GetItem(ProcedureWorkPackageListId, id))
+            {
+                workPackageResponse = responseMessage.Content.ReadAsStringAsync().Result;
+            }
+            WorkPackageItem workPackage = ((JObject)JsonConvert.DeserializeObject(workPackageResponse)).ToObject<WorkPackageItem>();
+            return workPackage;
+        }
+
+        protected List<BusinessItem> getAllBusinessItems(int workPackageId)
+        {
+            string businessItemResponse = null;
+            using (HttpResponseMessage responseMessage = GetList(ProcedureBusinessItemListId, filter: $"BelongsTo/ID eq {workPackageId}"))
+            {
+                businessItemResponse = responseMessage.Content.ReadAsStringAsync().Result;
+            }
+            JObject jsonBusinessItem = (JObject)JsonConvert.DeserializeObject(businessItemResponse);
+
+            List<BusinessItem> businessItemList = jsonBusinessItem.SelectToken("value").ToObject<List<BusinessItem>>();
+
+            return businessItemList;
+        }
+
+        protected List<RouteItem> getAllRoutes(int procedureId)
+        {
+            string routeResponse = null;
+            using (HttpResponseMessage responseMessage = GetList(ProcedureRouteListId, filter: $"Procedure/ID eq {procedureId}"))
+            {
+                routeResponse = responseMessage.Content.ReadAsStringAsync().Result;
+            }
+            JObject jsonRoute = (JObject)JsonConvert.DeserializeObject(routeResponse);
+            List<RouteItem> routes = ((JArray)jsonRoute.SelectToken("value")).ToObject<List<RouteItem>>();
+
+            return routes;
+        }
+
     }
 }

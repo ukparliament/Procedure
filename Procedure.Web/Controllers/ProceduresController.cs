@@ -68,13 +68,7 @@ namespace Procedure.Web.Controllers
 
         private string GiveMeDotString(int procedureId, bool showLegend)
         {
-            string routeResponse = null;
-            using (HttpResponseMessage responseMessage = GetList(ProcedureRouteListId, filter: $"Procedure/ID eq {procedureId}"))
-            {
-                routeResponse = responseMessage.Content.ReadAsStringAsync().Result;
-            }
-            JObject jsonRoute = (JObject)JsonConvert.DeserializeObject(routeResponse);
-            List<RouteItem> routes = ((JArray)jsonRoute.SelectToken("value")).ToObject<List<RouteItem>>();
+            List<RouteItem> routes = getAllRoutes(procedureId);
 
             if (routes.Any())
             {
@@ -99,7 +93,7 @@ namespace Procedure.Web.Controllers
                     }
                 }
 
-                if(showLegend == false)
+                if(showLegend == true)
                 {
                     builder.Append("subgraph cluster_key {" +
                    "label=\"Key\"; labeljust=\"l\";" +
@@ -132,13 +126,7 @@ namespace Procedure.Web.Controllers
         [Route("{id:int}/graph.graphml")]
         public ActionResult GraphML(int id)
         {
-            string routeResponse = null;
-            using (HttpResponseMessage responseMessage = GetList(ProcedureRouteListId, filter: $"Procedure/ID eq {id}"))
-            {
-                routeResponse = responseMessage.Content.ReadAsStringAsync().Result;
-            }
-            JObject jsonRoute = (JObject)JsonConvert.DeserializeObject(routeResponse);
-            List<RouteItem> routes = ((JArray)jsonRoute.SelectToken("value")).ToObject<List<RouteItem>>();
+            List<RouteItem> routes = getAllRoutes(id);
 
             // Using Parliament nuget packages, map user-defined classes into ontology-aligned interfaces which all implement iResource interface
             // This allows us to work with IGraph objects

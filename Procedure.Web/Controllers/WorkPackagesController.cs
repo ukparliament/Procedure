@@ -1,10 +1,7 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Procedure.Web.Extensions;
+﻿using Procedure.Web.Extensions;
 using Procedure.Web.Models;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Text;
 using System.Web.Mvc;
 
@@ -23,12 +20,13 @@ namespace Procedure.Web.Controllers
         public ActionResult Details(int id)
         {
             WorkPackageDetailViewModel viewModel = new WorkPackageDetailViewModel();
-            WorkPackageItem workPackage = fetchWorkPackageFromSharepoint(id);
+            WorkPackageItem workPackage = getWorkPackage(id);
             if (workPackage.Id != 0)
             {
                 viewModel.WorkPackage = workPackage;
                 viewModel.Tree = giveMeTheTree(id, viewModel.WorkPackage.SubjectTo.Id);
             }
+
             return View(viewModel);
         }
 
@@ -36,7 +34,7 @@ namespace Procedure.Web.Controllers
         public ActionResult GraphViz(int id)
         {
             GraphVizViewModel viewmodel = new GraphVizViewModel();
-            viewmodel.DotString = GiveMeDotString(id, showLegend:true);
+            viewmodel.DotString = GiveMeDotString(id, showLegend: true);
 
             return View(viewmodel);
         }
@@ -44,37 +42,23 @@ namespace Procedure.Web.Controllers
         [Route("{id:int}/graph.dot")]
         public ContentResult GraphDot(int id)
         {
-            return Content(GiveMeDotString(id, showLegend:false), "text/plain");
+            return Content(GiveMeDotString(id, showLegend: false), "text/plain");
         }
 
         private string GiveMeDotString(int workPackageId, bool showLegend)
         {
-            WorkPackageItem workPackage = fetchWorkPackageFromSharepoint(workPackageId);
+            WorkPackageItem workPackage = getWorkPackage(workPackageId);
             if (workPackage.Id != 0)
             {
                 int procedureId = workPackage.SubjectTo.Id;
 
-                // Get actualized steps (this needs workPackage ID param)
-                string businessItemResponse = null;
-                using (HttpResponseMessage responseMessage = GetList(ProcedureBusinessItemListId, filter: $"BelongsTo/ID eq {workPackageId}"))
-                {
-                    businessItemResponse = responseMessage.Content.ReadAsStringAsync().Result;
-                }
-                JObject jsonBusinessItem = (JObject)JsonConvert.DeserializeObject(businessItemResponse);
-
-                List<BusinessItem> businessItemList = jsonBusinessItem.SelectToken("value").ToObject<List<BusinessItem>>();
+                List<BusinessItem> businessItemList = getAllBusinessItems(workPackageId);
                 int[] actualizedStepIds = businessItemList
-                    .SelectMany(bi => bi.ActualisesProcedureStep.Select(s => s.Id))
-                    .ToArray();
+                .SelectMany(bi => bi.ActualisesProcedureStep.Select(s => s.Id))
+                .ToArray();
 
-                // Get all their possible next steps (this needs procedure ID param)
-                string routeResponse = null;
-                using (HttpResponseMessage responseMessage = GetList(ProcedureRouteListId, filter: $"Procedure/ID eq {procedureId}"))
-                {
-                    routeResponse = responseMessage.Content.ReadAsStringAsync().Result;
-                }
-                JObject jsonRoute = (JObject)JsonConvert.DeserializeObject(routeResponse);
-                List<RouteItem> routes = ((JArray)jsonRoute.SelectToken("value")).ToObject<List<RouteItem>>();
+                List<RouteItem> routes = getAllRoutes(procedureId);
+
                 List<RouteItem> routesWithActualizedFromSteps = routes.Where(route => actualizedStepIds.Contains(route.FromStep.Id)).ToList();
                 List<RouteItem> routesWithActualizedToSteps = routes.Where(route => actualizedStepIds.Contains(route.ToStep.Id)).ToList();
 
@@ -164,13 +148,8 @@ namespace Procedure.Web.Controllers
         {
             List<WorkPackageRouteTree> result = new List<WorkPackageRouteTree>();
 
-            string businessItemResponse = null;
-            using (HttpResponseMessage responseMessage = GetList(ProcedureBusinessItemListId, filter: $"BelongsTo/ID eq {workPackageId}"))
-            {
-                businessItemResponse = responseMessage.Content.ReadAsStringAsync().Result;
-            }
-            JObject jsonBusinessItem = (JObject)JsonConvert.DeserializeObject(businessItemResponse);
-            List<BusinessItem> allBusinessItems = ((JArray)jsonBusinessItem.SelectToken("value")).ToObject<List<BusinessItem>>();
+            List<BusinessItem> allBusinessItems = getAllBusinessItems(workPackageId);
+
             int[] stepsDone = allBusinessItems
                 .SelectMany(bi => bi.ActualisesProcedureStep.Select(s => s.Id))
                 .ToArray();
@@ -244,15 +223,6 @@ namespace Procedure.Web.Controllers
             return result;
         }
 
-        private WorkPackageItem fetchWorkPackageFromSharepoint(int id)
-        {
-            string workPackageResponse = null;
-            using (HttpResponseMessage responseMessage = GetItem(ProcedureWorkPackageListId, id))
-            {
-                workPackageResponse = responseMessage.Content.ReadAsStringAsync().Result;
-            }
-            WorkPackageItem workPackage = ((JObject)JsonConvert.DeserializeObject(workPackageResponse)).ToObject<WorkPackageItem>();
-            return workPackage;
-        }
+        
     }
 }

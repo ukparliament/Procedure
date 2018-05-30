@@ -14,31 +14,6 @@ details {
     margin-left: 20px;
 }
 
-@supports (-ms-ime-align:auto) {
-    details, .details {
-        list-style: none;
-        display: block;
-    }
-
-    summary::-webkit-details-marker {
-        display: none
-    }
-
-    summary:after {
-        content: "►";
-        float: left;
-        font-size: 16px;
-        font-weight: bold;
-        margin: 0px 5px 0 0;
-        padding: 0;
-        text-align: center;
-    }
-
-    details[open] summary:after {
-        content: "▼";
-    }
-}
-
 .center-text {
     text-align: center;
 }
