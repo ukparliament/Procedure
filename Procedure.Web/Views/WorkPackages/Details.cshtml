@@ -30,7 +30,7 @@
                     @if (Model.WorkPackage.ComingIntoForceDate != null && Model.WorkPackage.ComingIntoForceDate != new DateTime(0001, 01, 01, 00, 00, 00))
                     {
                         <dt>Coming into force date</dt>
-                        <dd>@Model.WorkPackage.ComingIntoForceDate.ToShortDateString()</dd>
+                        <dd>@Model.WorkPackage.ComingIntoForceDate.ToString("dd/MM/yyyy")</dd>
                     }
                     @if (!String.IsNullOrEmpty(Model.WorkPackage.ComingIntoForceNote))
                     {
@@ -45,7 +45,7 @@
                     @if (Model.WorkPackage.ObjectionDeadline != null && Model.WorkPackage.ObjectionDeadline != new DateTime(0001, 01, 01, 00, 00, 00))
                     {
                         <dt>Objection deadline</dt>
-                        <dd>@Model.WorkPackage.ObjectionDeadline.ToShortDateString()</dd>
+                        <dd>@Model.WorkPackage.ObjectionDeadline.ToString("dd/MM/yyyy")</dd>
                     }
                 </dl>
             </div>
@@ -71,7 +71,7 @@
                                 }
                                 @if (businessItem.Date != null)
                                 {
-                                    <span><p>Actualized on: @businessItem.Date.ToShortDateString() (@businessItem.Date.DayOfWeek)</p></span>
+                                    <span><p>Actualized on: @businessItem.Date.ToString("dd/MM/yyyy") (@businessItem.Date.DayOfWeek)</p></span>
                                 }
                                 @if (businessItem.Weblink != null)
                                 {

@@ -23,7 +23,7 @@ namespace Procedure.Web.Models
             StringBuilder sb = new StringBuilder();
             if (Date != null)
             {
-                sb.Append($"{Date.ToShortDateString()}_");
+                sb.Append($"{Date.ToString("dd/MM/yyyy")}_");
             }
             if (!String.IsNullOrEmpty(Weblink))
             {
