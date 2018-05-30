@@ -10,8 +10,43 @@
                 <h2>@Model.WorkPackage.Title</h2>
                 @Html.ActionLink("See Graph", "GraphViz", "WorkPackages", new { id = Model.WorkPackage.Id }, new { @class = "btn--primary" })
                 <dl class="list--definition">
-                    <dt>Subject to </dt>
+                    <dt>Subject to</dt>
                     <dd>@Html.ActionLink(Model.WorkPackage.SubjectTo.Value, "Details", "Procedures", new { id = Model.WorkPackage.SubjectTo.Id }, new { })</dd>
+                    @if (!String.IsNullOrEmpty(Model.WorkPackage.SIPrefix))
+                    {
+                        <dt>SI Prefix</dt>
+                        <dd>@Model.WorkPackage.SIPrefix</dd>
+                    }
+                    @if (!String.IsNullOrEmpty(Model.WorkPackage.SIYear))
+                    {
+                        <dt>SI Year</dt>
+                        <dd>@Model.WorkPackage.SIYear</dd>
+                    }
+                    @if (!String.IsNullOrEmpty(Model.WorkPackage.SINumber))
+                    {
+                        <dt>SI Number</dt>
+                        <dd>@Model.WorkPackage.SINumber</dd>
+                    }
+                    @if (Model.WorkPackage.ComingIntoForceDate != null && Model.WorkPackage.ComingIntoForceDate != new DateTime(0001, 01, 01, 00, 00, 00))
+                    {
+                        <dt>Coming into force date</dt>
+                        <dd>@Model.WorkPackage.ComingIntoForceDate.ToShortDateString()</dd>
+                    }
+                    @if (!String.IsNullOrEmpty(Model.WorkPackage.ComingIntoForceNote))
+                    {
+                        <dt>Coming into force note</dt>
+                        <dd>@Model.WorkPackage.ComingIntoForceNote</dd>
+                    }
+                    @if (!String.IsNullOrEmpty(Model.WorkPackage.WorkPackageableThingURL))
+                    {
+                        <dt>Work Packagable Thing URL</dt>
+                        <dd><a href="@Model.WorkPackage.WorkPackageableThingURL">@Model.WorkPackage.WorkPackageableThingURL</a></dd>
+                    }
+                    @if (Model.WorkPackage.ObjectionDeadline != null && Model.WorkPackage.ObjectionDeadline != new DateTime(0001, 01, 01, 00, 00, 00))
+                    {
+                        <dt>Objection deadline</dt>
+                        <dd>@Model.WorkPackage.ObjectionDeadline.ToShortDateString()</dd>
+                    }
                 </dl>
             </div>
         </div>
@@ -50,51 +85,51 @@
                                 @if (businessItem.BelongsTo.Count > 1)
                                 {
                                     <span><p>This business item also belongs to:</p></span>
-                                        <div>
-                                            <ul class="list--details">
-                                                @foreach (SharepointLookupItem workPackage in businessItem.BelongsTo)
+                                    <div>
+                                        <ul class="list--details">
+                                            @foreach (SharepointLookupItem workPackage in businessItem.BelongsTo)
+                                            {
+                                                if (workPackage.Id != Model.WorkPackage.Id)
                                                 {
-                                                    if (workPackage.Id != Model.WorkPackage.Id)
-                                                    {
-                                                        <li class="block--transparent">@Html.ActionLink(workPackage.Value, "Details", "WorkPackages", new { id = workPackage.Id }, new { })</li>
-                                                    }
+                                                    <li class="block--transparent">@Html.ActionLink(workPackage.Value, "Details", "WorkPackages", new { id = workPackage.Id }, new { })</li>
                                                 }
-                                            </ul>
-                                        </div>
-                                        }
+                                            }
+                                        </ul>
+                                    </div>
+                                }
 
-                                </li>
-                            }
-                            </ul>
+                            </li>
                         }
-                        else
-                        {
-                        <h3>Not actualised by any business item</h3>
-                        }
-                    </div>
-                </div>
-            </section>
+                    </ul>
+                }
+                else
+                {
+                    <h3>This work package does not have any business items.</h3>
+                }
+            </div>
+        </div>
+    </section>
 
-            <section>
-                <div class="container">
-                    <h3>Has following procedure tree</h3>
-                    @if (!Model.Tree.IsNullOrEmpty())
-                    {
-                        Html.RenderPartial("DetailsRoute", Model.Tree);
-                    }
-                    else
-                    {
-                        <p> No tree shown because there are no business items or no entry steps (e.g. SI exists) have been defined.</p>
-                    }
-                </div>
-            </section>
-        }
-        else
-        {
-            <section>
-                <div class="container">
-                    <h3>The item does not exist or has been deleted.</h3>
-                </div>
-            </section>
+    <section>
+        <div class="container">
+            @if (!Model.Tree.IsNullOrEmpty())
+            {
+                <h3>Has following procedure tree</h3>
+                Html.RenderPartial("DetailsRoute", Model.Tree);
+            }
+            else
+            {
+                <p> No tree shown because there are no business items or no entry steps (e.g. SI exists) have been defined.</p>
+            }
+        </div>
+    </section>
+}
+else
+{
+    <section>
+        <div class="container">
+            <h3>The item does not exist or has been deleted.</h3>
+        </div>
+    </section>
 
-        }
+}

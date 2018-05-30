@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Parliament.Model;
+using System;
 
 namespace Procedure.Web.Models
 {
@@ -14,7 +15,21 @@ namespace Procedure.Web.Models
         [JsonProperty(PropertyName = "OData__x0076_dy9")]
         public string TripleStoreId { get; set; }
 
+        public string SIPrefix { get; set; }
+
+        public string SIYear { get; set; }
+
+        public string SINumber { get; set; }
+
+        public string ComingIntoForceNote { get; set; }
+
+        public DateTime ComingIntoForceDate { get; set; }
+
         public SharepointLookupItem WorkPackagableThingType { get; set; }
+
+        public string WorkPackageableThingURL { get; set; }
+
+        public DateTime ObjectionDeadline { get; set; }
 
         // Note Title is property of WorkPackageableThing instead of WorkPackage  
         public IWorkPackage GiveMeMappedObject(string tripleStoreId)

@@ -7,19 +7,28 @@
 
     <section>
         <div class="container">
-            <h2>@Model.Step.Title</h2>
-            @if (!String.IsNullOrEmpty(Model.Step.Description))
-            {
-                <p>Description: @Model.Step.Description</p>
-            }
-            @if (Model.Step.House.Any())
-            {
-                foreach (SharepointLookupItem House in Model.Step.House)
-                {
-                    <p>@House.Value</p>
-                }
-            }
+            <div class="block--border">
+                <h2>@Model.Step.Title</h2>
+                <dl class="list--definition">
+                    @if (!String.IsNullOrEmpty(Model.Step.Description))
+                    {
+                        <dt>Description </dt>
+                        <dd>@Model.Step.Description</dd>
+                    }
+                    @if (Model.Step.House.Any())
+                    {
+                        foreach (SharepointLookupItem House in Model.Step.House)
+                        {
+                            <dd>@House.Value</dd>
+                        }
+                    }
+                </dl>
+            </div>
+        </div>
+    </section>
 
+    <section>
+        <div class="container">
             <div class="block--border__bottom">
                 @if (Model.Routes.Any())
                 {
@@ -48,41 +57,42 @@
                     <h3>Not present in any route</h3>
                 }
             </div>
+        </div>
+    </section>
 
-            <div class="block--border__bottom">
-                @if (Model.BusinessItems.Any())
-                {
-                    <h3>Actualised by following business items</h3>
-                    <ul class="list--details">
-                        @foreach (BusinessItem businessItem in Model.BusinessItems.OrderBy(p => p.Id))
-                        {
-                            <li>
-                                [@businessItem.AllData()] belonging to
-                                @if (businessItem.BelongsTo.Count == 1)
-                                {
-                                    @Html.ActionLink(businessItem.BelongsTo[0].Value, "Details", "WorkPackages", new { id = businessItem.BelongsTo[0].Id }, new { })
-                                }
-                                else
-                                {
-                                    <div>
-                                        <ul class="list--details">
-                                            @foreach (SharepointLookupItem workPackage in businessItem.BelongsTo)
-                                            {
-                                                <li>@Html.ActionLink(workPackage.Value, "Details", "WorkPackages", new { id = workPackage.Id }, new { })</li>
-                                            }
-                                        </ul>
-                                    </div>
-                                }
-                            </li>
-                        }
-                    </ul>
-                }
-                else
-                {
-                    <h3>Not actualised by any business item</h3>
-                }
-            </div>
-
+    <section>
+        <div class="container">
+            @if (Model.BusinessItems.Any())
+            {
+                <h3>Actualised by following business items</h3>
+                <ul class="list--details">
+                    @foreach (BusinessItem businessItem in Model.BusinessItems.OrderBy(p => p.Id))
+                    {
+                        <li>
+                            [@businessItem.AllData()] belonging to
+                            @if (businessItem.BelongsTo.Count == 1)
+                            {
+                                @Html.ActionLink(businessItem.BelongsTo[0].Value, "Details", "WorkPackages", new { id = businessItem.BelongsTo[0].Id }, new { })
+                            }
+                            else
+                            {
+                                <div>
+                                    <ul class="list--details">
+                                        @foreach (SharepointLookupItem workPackage in businessItem.BelongsTo)
+                                        {
+                                            <li>@Html.ActionLink(workPackage.Value, "Details", "WorkPackages", new { id = workPackage.Id }, new { })</li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <h3>Not actualised by any business item</h3>
+            }
         </div>
     </section>
 
