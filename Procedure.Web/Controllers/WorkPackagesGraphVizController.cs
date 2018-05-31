@@ -38,6 +38,8 @@ namespace Procedure.Web.Controllers
 
             var schema_step = g.CreateUriNode(":ProcedureStep");
             var schema_stepName = g.CreateUriNode(":procedureStepName");
+            var schema_workPackageableThingName = g.CreateUriNode(":workPackageableThingName");
+            var schema_procedureName = g.CreateUriNode(":procedureName");
             var rdf_type = g.CreateUriNode("rdf:type");
             var ex_possible = g.CreateUriNode("ex:Possible");
             var ex_actualized = g.CreateUriNode("ex:Actualized");
@@ -88,6 +90,14 @@ namespace Procedure.Web.Controllers
                 builder.Append("];");
             }
 
+            var workPackageableThing = g.GetTriplesWithPredicate(schema_workPackageableThingName).FirstOrDefault();
+            var procedure = g.GetTriplesWithPredicate(schema_procedureName).FirstOrDefault();
+
+            if(workPackageableThing != null && procedure != null)
+            {
+                builder.Append($"labelloc=\"t\"; fontsize = \"25\"; label = \"{workPackageableThing.Object.ToString()} \\n Subject to: {procedure.Object.ToString()}\"");
+            }
+
             builder.Append("}");
 
             return builder.ToString();
@@ -106,7 +116,7 @@ namespace Procedure.Web.Controllers
             {
                 using (HttpClient client = new HttpClient())
                 {
-                    workPackageResponse = client.GetStringAsync($"https://api.parliament.uk/staging/fixed-query/work_package_by_id?work_package_id=https://id.parliament.uk/{tripleStoreId}").Result;
+                    workPackageResponse = client.GetStringAsync($"https://api.parliament.uk/staging/fixed-query/work_package_by_id?work_package_id={tripleStoreId}").Result;
                 }
             }
             catch
