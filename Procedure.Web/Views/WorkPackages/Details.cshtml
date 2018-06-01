@@ -52,6 +52,11 @@
                         <dt>Objection deadline</dt>
                         <dd>@Model.WorkPackage.ObjectionDeadline.ToString("dd/MM/yyyy")</dd>
                     }
+                    @if (Model.WorkPackage.TripleStoreId != null)
+                    {
+                        <dt>Staging graph (shoud be same as here after each orchestration)</dt>
+                        <dd><a href="http://procedures.azurewebsites.net/workpackagesgraphviz/@(Model.WorkPackage.TripleStoreId)">@(Model.WorkPackage.TripleStoreId)</a></dd>
+                    }
                 </dl>
             </div>
         </div>

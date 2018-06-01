@@ -117,7 +117,9 @@ namespace Procedure.Web.Controllers
                     }
                 }
 
-                if(showLegend == true)
+                builder.Append($"labelloc=\"t\"; fontsize = \"25\"; label = \"{workPackage.Title} \\n Subject to: {workPackage.SubjectTo.Value}\"");
+
+                if (showLegend == true)
                 {
                     builder.Append("subgraph cluster_key {" +
                     "label=\"Key\"; labeljust=\"l\" " +
