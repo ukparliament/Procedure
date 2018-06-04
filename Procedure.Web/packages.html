@@ -65,7 +65,9 @@
         }
 
         function render(data) {
-            Object.keys(data).map(createViewerLinkItem).forEach(appendItem);
+            var subjects = Object.keys(data).filter(s => data[s]["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"].filter(t => t.value === "https://id.parliament.uk/schema/WorkPackage").length);
+
+            subjects.map(createViewerLinkItem).forEach(appendItem);
 
             log();
         }
