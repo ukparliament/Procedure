@@ -93,7 +93,7 @@ namespace Procedure.Web.Controllers
             var workPackageableThing = g.GetTriplesWithPredicate(schema_workPackageableThingName).FirstOrDefault();
             var procedure = g.GetTriplesWithPredicate(schema_procedureName).FirstOrDefault();
 
-            if(workPackageableThing != null && procedure != null)
+            if (workPackageableThing != null && procedure != null)
             {
                 builder.Append($"labelloc=\"t\"; fontsize = \"25\"; label = \"{workPackageableThing.Object.ToString()} \\n Subject to: {procedure.Object.ToString()}\"");
             }
@@ -109,14 +109,25 @@ namespace Procedure.Web.Controllers
         }
 
         [Route("{tripleStoreId}")]
-        public ActionResult GraphViz(string tripleStoreId)
+        public ActionResult GraphVizLive(string tripleStoreId)
+        {
+            return this.GraphViz($"https://api.parliament.uk/query/work_package_by_id?work_package_id={tripleStoreId}");
+        }
+
+        [Route("{tripleStoreId}/staging")]
+        public ActionResult GraphVizStaging(string tripleStoreId)
+        {
+            return this.GraphViz($"https://api.parliament.uk/staging/fixed-query/work_package_by_id?work_package_id={tripleStoreId}");
+        }
+
+        private ActionResult GraphViz(string url)
         {
             string workPackageResponse = null;
             try
             {
                 using (HttpClient client = new HttpClient())
                 {
-                    workPackageResponse = client.GetStringAsync($"https://api.parliament.uk/staging/fixed-query/work_package_by_id?work_package_id={tripleStoreId}").Result;
+                    workPackageResponse = client.GetStringAsync(url).Result;
                 }
             }
             catch
@@ -133,7 +144,7 @@ namespace Procedure.Web.Controllers
             {
                 viewmodel.DotString = string.Empty;
             }
-            return View(viewmodel);
+            return View("GraphViz", viewmodel);
         }
 
         [Route("generated")]

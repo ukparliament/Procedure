@@ -41,14 +41,6 @@
         }
     </style>
     <script>
-        let urlTemplate = "https://api.parliament.uk/Staging/sparql-endpoint/master?subscription-key=ae77214d28654f82884f7143ef16b9dd&query=";
-        let packagesQuery = `
-PREFIX : <https://id.parliament.uk/schema/>
-
-SELECT DISTINCT ?package
-WHERE { ?package a :WorkPackage; :workPackageHasBusinessItem ?item . }
-`;
-
         window.addEventListener("load", onLoad);
 
         function onLoad() {
@@ -56,17 +48,9 @@ WHERE { ?package a :WorkPackage; :workPackageHasBusinessItem ?item . }
 
             log("Package list loading");
 
-            let encodedQuery = encodeURI(packagesQuery);
-            let url = urlTemplate + encodedQuery;
-            var options = {
-                headers: {
-                    accept: "application/sparql-results+json"
-                }
-            };
-
-            fetch(url, options)
+            fetch("https://api.parliament.uk/staging/fixed-query/work_package_index.rj")
                 .then(response => response.json())
-                .then(json => render(json.results.bindings.map(binding => binding.package.value)));
+                .then(json => render(json));
         }
 
         function log(message) {
@@ -81,7 +65,7 @@ WHERE { ?package a :WorkPackage; :workPackageHasBusinessItem ?item . }
         }
 
         function render(data) {
-            data.map(createViewerLinkItem).forEach(appendItem);
+            Object.keys(data).map(createViewerLinkItem).forEach(appendItem);
 
             log();
         }
@@ -111,7 +95,7 @@ WHERE { ?package a :WorkPackage; :workPackageHasBusinessItem ?item . }
             linksElement.appendChild(createLink("?" + Math.random().toString() + "#" + url, "viewer", "3D"));
             linksElement.appendChild(document.createTextNode(" "));
 
-            linksElement.appendChild(createLink("//procedures.azurewebsites.net/workpackagesgraphviz/" + id, "viewer", "flowchart"));
+            linksElement.appendChild(createLink("//procedures.azurewebsites.net/workpackagesgraphviz/" + id + "/staging", "viewer", "flowchart"));
             linksElement.appendChild(document.createTextNode(" "));
 
 
