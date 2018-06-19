@@ -12,7 +12,7 @@ namespace Procedure.Web.Models
         public List<SharepointLookupItem> ActualisesProcedureStep { get; set; }
 
         [JsonProperty(PropertyName = "Businessitem_x0020_date")]
-        public DateTime Date { get; set; }
+        public DateTime? Date { get; set; }
 
         public string Weblink { get; set; } 
 
@@ -23,7 +23,7 @@ namespace Procedure.Web.Models
             StringBuilder sb = new StringBuilder();
             if (Date != null)
             {
-                sb.Append($"{Date.ToString("dd/MM/yyyy")}_");
+                sb.Append($"{Date.Value.ToString("dd/MM/yyyy")}_");
             }
             if (!String.IsNullOrEmpty(Weblink))
             {

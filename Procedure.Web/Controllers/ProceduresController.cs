@@ -130,10 +130,10 @@ namespace Procedure.Web.Controllers
 
             // Using Parliament nuget packages, map user-defined classes into ontology-aligned interfaces which all implement iResource interface
             // This allows us to work with IGraph objects
-            IEnumerable<IProcedureRoute> IRoutes = routes.Select(r => r.GiveMeMappedObject());
+            IEnumerable<ProcedureRoute> IRoutes = routes.Select(r => r.GiveMeMappedObject());
 
             RdfSerializer serializer = new RdfSerializer();
-            IGraph graph = serializer.Serialize(IRoutes, typeof(IProcedureRoute).Assembly.GetTypes());
+            IGraph graph = serializer.Serialize(IRoutes, typeof(ProcedureRoute).Assembly.GetTypes());
 
             SparqlQueryParser parser = new SparqlQueryParser();
             // Nodes 

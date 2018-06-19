@@ -46,9 +46,9 @@
                                         <span><p>@Html.ActionLink(procedureStep.Value, "Details", "Steps", new { id = procedureStep.Id }, new { })</p></span>
                                     }
                                 }
-                                @if (businessItem.Date != null)
+                                @if (businessItem.Date.HasValue)
                                 {
-                                    <span><p>Actualized on: @businessItem.Date.ToString("dd/MM/yyyy") (@businessItem.Date.DayOfWeek)</p></span>
+                                    <span><p>Actualized on: @businessItem.Date.Value.ToString("dd/MM/yyyy") (@businessItem.Date.Value.DayOfWeek)</p></span>
                                 }
                                 @if (businessItem.Weblink != null)
                                 {

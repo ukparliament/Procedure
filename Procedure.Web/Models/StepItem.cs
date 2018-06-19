@@ -10,10 +10,10 @@ namespace Procedure.Web.Models
 
         public SharepointLookupItem[] House { get; set; }
 
-        public IProcedureStep GiveMeMappedObject(string tripleStoreId)
+        public ProcedureStep GiveMeMappedObject(string tripleStoreId)
         {
             string id = tripleStoreId ?? TripleStoreId;
-            IProcedureStep result = new ProcedureStep();
+            ProcedureStep result = new ProcedureStep();
             result.Id = new System.Uri($"https://id.parliament.uk/{id}");
             result.ProcedureStepName = Title;
             result.ProcedureStepDescription = Description;

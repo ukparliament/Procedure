@@ -39,12 +39,12 @@ namespace Procedure.Web.Models
         [JsonProperty(PropertyName = "Procedure_x003a_TripleStoreId")]
         public SharepointLookupItem ProcedureTripleStoreIdJsonObj { get; set; }
 
-        public IProcedureRoute GiveMeMappedObject()
+        public ProcedureRoute GiveMeMappedObject()
         {
-            IProcedureRoute result = new ProcedureRoute();
+            ProcedureRoute result = new ProcedureRoute();
             result.Id = new System.Uri($"https://id.parliament.uk/{TripleStoreId}");
-            result.ProcedureRouteIsToProcedureStep = new IProcedureStep[] { ToStep.ToSharepointItem<StepItem>().GiveMeMappedObject(ToStepTripleStoreIdJsonObj.Value)};
-            result.ProcedureRouteIsFromProcedureStep = new IProcedureStep[] { FromStep.ToSharepointItem<StepItem>().GiveMeMappedObject(FromStepTripleStoreIdJsonObj.Value)};
+            result.ProcedureRouteIsToProcedureStep = new ProcedureStep[] { ToStep.ToSharepointItem<StepItem>().GiveMeMappedObject(ToStepTripleStoreIdJsonObj.Value)};
+            result.ProcedureRouteIsFromProcedureStep = new ProcedureStep[] { FromStep.ToSharepointItem<StepItem>().GiveMeMappedObject(FromStepTripleStoreIdJsonObj.Value)};
             // result.ProcedureRouteHasProcedure = new IProcedure[] { Procedure.ToSharepointItem<ProcedureItem>().GiveMeMappedObject(ProcedureTripleStoreIdJsonObj.Value)};
 
             return result;

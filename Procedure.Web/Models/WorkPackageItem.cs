@@ -23,19 +23,19 @@ namespace Procedure.Web.Models
 
         public string ComingIntoForceNote { get; set; }
 
-        public DateTime ComingIntoForceDate { get; set; }
+        public DateTime? ComingIntoForceDate { get; set; }
 
         public SharepointLookupItem WorkPackagableThingType { get; set; }
 
         public string WorkPackageableThingURL { get; set; }
 
-        public DateTime ObjectionDeadline { get; set; }
+        public DateTime? ObjectionDeadline { get; set; }
 
         // Note Title is property of WorkPackageableThing instead of WorkPackage  
-        public IWorkPackage GiveMeMappedObject(string tripleStoreId)
+        public WorkPackage GiveMeMappedObject(string tripleStoreId)
         {
             string id = tripleStoreId ?? TripleStoreId;
-            IWorkPackage result = new WorkPackage();
+            WorkPackage result = new WorkPackage();
             result.Id = new System.Uri($"https://id.parliament.uk/{id}");
             result.WorkPackageHasProcedure = SubjectTo.ToSharepointItem<ProcedureItem>().GiveMeMappedObject(SubjectToTripleStoreIdJsonObj.Value);
 
