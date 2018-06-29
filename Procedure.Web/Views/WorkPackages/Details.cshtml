@@ -19,10 +19,10 @@
                     }
                     @if (Model.WorkPackage.TripleStoreId != null)
                     {
-                        <dt>Staging graph (shoud be same as here after each orchestration)</dt>
-                        <dd><a href="http://procedures.azurewebsites.net/workpackagesgraphviz/@(Model.WorkPackage.TripleStoreId)">@(Model.WorkPackage.TripleStoreId)</a></dd>
+                        <dt>Graph of orchestrated work package (@(Model.WorkPackage.TripleStoreId))</dt>
+                        <dd><a href="http://procedures.azurewebsites.net/workpackagesgraphviz/@(Model.WorkPackage.TripleStoreId)">Live</a> | <a href="http://procedures.azurewebsites.net/workpackagesgraphviz/@(Model.WorkPackage.TripleStoreId)/staging">Staging</a></dd>
                         <dt>Website display</dt>
-                        <dd><a href="https://beta.parliament.uk/work-packages/@(Model.WorkPackage.TripleStoreId)" target="_blank">beta</a></dd>
+                        <dd><a href="https://beta.parliament.uk/work-packages/@(Model.WorkPackage.TripleStoreId)" target="_blank">beta</a> | <a href="https://devci.parliament.uk/work-packages/@(Model.WorkPackage.TripleStoreId)" target="_blank">devci</a></dd>
                     }
                 </dl>
             </div>

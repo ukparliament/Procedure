@@ -7,6 +7,13 @@
     <section>
         <div class="container">
             <h2>@Model.Procedure.Title</h2>
+            <dl class="list--definition">
+                @if (Model.Procedure.TripleStoreId != null)
+                {
+                    <dt>Website display</dt>
+                    <dd><a href="https://beta.parliament.uk/procedures/@(Model.Procedure.TripleStoreId)" target="_blank">beta</a> | <a href="https://devci.parliament.uk/procedures/@(Model.Procedure.TripleStoreId)" target="_blank">devci</a></dd>
+                }
+            </dl>
             @Html.ActionLink("See Graph", "GraphViz", "Procedures", new { id = Model.Procedure.Id }, new { @class = "btn--primary" })
             @{
                 Html.RenderPartial("Tree", Model.Tree);
