@@ -45,7 +45,6 @@ namespace Procedure.Web.Models
             result.Id = new System.Uri($"https://id.parliament.uk/{TripleStoreId}");
             result.ProcedureRouteIsToProcedureStep = new ProcedureStep[] { ToStep.ToSharepointItem<StepItem>().GiveMeMappedObject(ToStepTripleStoreIdJsonObj.Value)};
             result.ProcedureRouteIsFromProcedureStep = new ProcedureStep[] { FromStep.ToSharepointItem<StepItem>().GiveMeMappedObject(FromStepTripleStoreIdJsonObj.Value)};
-            // result.ProcedureRouteHasProcedure = new IProcedure[] { Procedure.ToSharepointItem<ProcedureItem>().GiveMeMappedObject(ProcedureTripleStoreIdJsonObj.Value)};
 
             return result;
         }

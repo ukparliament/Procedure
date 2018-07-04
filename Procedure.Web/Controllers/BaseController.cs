@@ -1,8 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using Dapper;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Procedure.Web.Models;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Mvc;
@@ -21,7 +23,27 @@ namespace Procedure.Web.Controllers
         private string listUri = ConfigurationManager.AppSettings["GetListUri"];
         private string itemUri = ConfigurationManager.AppSettings["GetItemUri"];
 
-        internal HttpResponseMessage GetList(string listId, int limit = 1000, string filter = null)
+        internal T GetSqlItem<T>(string sql) where T : new()
+        {
+            T result = new T();
+            using (SqlConnection connection = new SqlConnection(ConfigurationManager.AppSettings["AzureSQL"]))
+            {
+                result = connection.Query<T>(sql).SingleOrDefault();
+            }
+            return result;
+        }
+
+        internal IEnumerable<T> GetSqlList<T>(string sql)
+        {
+            IEnumerable<T> result = null;
+            using (SqlConnection connection = new SqlConnection(ConfigurationManager.AppSettings["AzureSQL"]))
+            {
+                result = connection.Query<T>(sql);
+            }
+            return result;
+        }
+
+        internal HttpResponseMessage GetSharepointList(string listId, int limit = 1000, string filter = null)
         {
             HttpClient client = new HttpClient();
 
@@ -33,7 +55,7 @@ namespace Procedure.Web.Controllers
             }).Result;
         }
 
-        internal HttpResponseMessage GetItem(string listId, int id)
+        internal HttpResponseMessage GetSharepointItem(string listId, int id)
         {
             string uri = itemUri.Replace("{listId}", listId)
                 .Replace("{id}", id.ToString());
@@ -46,7 +68,7 @@ namespace Procedure.Web.Controllers
         {
             List<T> items = new List<T>();
             string response = null;
-            using (HttpResponseMessage responseMessage = GetList(listId))
+            using (HttpResponseMessage responseMessage = GetSharepointList(listId))
             {
                 response = responseMessage.Content.ReadAsStringAsync().Result;
             }
@@ -61,12 +83,18 @@ namespace Procedure.Web.Controllers
             List<ProcedureRouteTree> result = new List<ProcedureRouteTree>();
 
             string routeResponse = null;
-            using (HttpResponseMessage responseMessage = GetList(ProcedureRouteListId, filter: $"Procedure/ID eq {procedureId}"))
+
+            // Sharepoint
+            using (HttpResponseMessage responseMessage = GetSharepointList(ProcedureRouteListId, filter: $"Procedure/ID eq {procedureId}"))
             {
                 routeResponse = responseMessage.Content.ReadAsStringAsync().Result;
             }
             JObject jsonRoute = (JObject)JsonConvert.DeserializeObject(routeResponse);
             List<RouteItem> routes = ((JArray)jsonRoute.SelectToken("value")).ToObject<List<RouteItem>>();
+            
+            // Azure SQL 
+            // List<RouteItem> routesfromSQL = GetSqlList<RouteItem>($"select * from ProcedureRoute where ProcedureId = {procedureId}").ToList();
+            
             RouteItem[] filteredRouteItems = routes.Where(to => to.FromStep.Id != to.ToStep.Id).ToArray();
             int[] entrySteps = filteredRouteItems
                 .Where(r => filteredRouteItems.Any(to => to.ToStep.Id == r.FromStep.Id) == false)
@@ -121,7 +149,7 @@ namespace Procedure.Web.Controllers
         protected WorkPackageItem getWorkPackage(int id)
         {
             string workPackageResponse = null;
-            using (HttpResponseMessage responseMessage = GetItem(ProcedureWorkPackageListId, id))
+            using (HttpResponseMessage responseMessage = GetSharepointItem(ProcedureWorkPackageListId, id))
             {
                 workPackageResponse = responseMessage.Content.ReadAsStringAsync().Result;
             }
@@ -132,13 +160,17 @@ namespace Procedure.Web.Controllers
         protected List<BusinessItem> getAllBusinessItems(int workPackageId)
         {
             string businessItemResponse = null;
-            using (HttpResponseMessage responseMessage = GetList(ProcedureBusinessItemListId, filter: $"BelongsTo/ID eq {workPackageId}"))
+
+            // Sharepoint 
+            using (HttpResponseMessage responseMessage = GetSharepointList(ProcedureBusinessItemListId, filter: $"BelongsTo/ID eq {workPackageId}"))
             {
                 businessItemResponse = responseMessage.Content.ReadAsStringAsync().Result;
             }
             JObject jsonBusinessItem = (JObject)JsonConvert.DeserializeObject(businessItemResponse);
-
             List<BusinessItem> businessItemList = jsonBusinessItem.SelectToken("value").ToObject<List<BusinessItem>>();
+
+            // Azure SQL
+            // List<BusinessItem> businessItemListFromSQL = GetSqlList<BusinessItem>($"select bi.Id as Id, bi.BusinessItemDate as [Date], bi.WebLink as Weblink from ProcedureBusinessItem bi inner join ProcedureBusinessItemProcedureWorkPackage biwp on bi.Id = biwp.ProcedureBusinessItemId where ProcedureWorkPackageId = {workPackageId}").ToList();
 
             return businessItemList;
         }
@@ -146,12 +178,17 @@ namespace Procedure.Web.Controllers
         protected List<RouteItem> getAllRoutes(int procedureId)
         {
             string routeResponse = null;
-            using (HttpResponseMessage responseMessage = GetList(ProcedureRouteListId, filter: $"Procedure/ID eq {procedureId}"))
+            
+            // Sharepoint
+            using (HttpResponseMessage responseMessage = GetSharepointList(ProcedureRouteListId, filter: $"Procedure/ID eq {procedureId}"))
             {
                 routeResponse = responseMessage.Content.ReadAsStringAsync().Result;
             }
             JObject jsonRoute = (JObject)JsonConvert.DeserializeObject(routeResponse);
             List<RouteItem> routes = ((JArray)jsonRoute.SelectToken("value")).ToObject<List<RouteItem>>();
+
+            // Azure SQL 
+            // List<RouteItem> routesfromSQL = GetSqlList<RouteItem>($"select * from ProcedureRoute where ProcedureId = {procedureId}").ToList();
 
             return routes;
         }

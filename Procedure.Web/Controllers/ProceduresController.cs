@@ -34,7 +34,7 @@ namespace Procedure.Web.Controllers
             ProcedureDetailViewModel viewModel = new ProcedureDetailViewModel();
 
             string procedureResponse = null;
-            using (HttpResponseMessage responseMessage = GetItem(ProcedureListId, id))
+            using (HttpResponseMessage responseMessage = GetSharepointItem(ProcedureListId, id))
             {
                 procedureResponse = responseMessage.Content.ReadAsStringAsync().Result;
             }
