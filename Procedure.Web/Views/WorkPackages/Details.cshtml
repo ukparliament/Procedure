@@ -11,7 +11,7 @@
                 @Html.ActionLink("See Graph", "GraphViz", "WorkPackages", new { id = Model.WorkPackage.Id }, new { @class = "btn--primary" })
                 <dl class="list--definition">
                     <dt>Subject to</dt>
-                    <dd>@Html.ActionLink(Model.WorkPackage.SubjectTo.Value, "Details", "Procedures", new { id = Model.WorkPackage.SubjectTo.Id }, new { })</dd>
+                    <dd>@Html.ActionLink(Model.WorkPackage.ProcedureName, "Details", "Procedures", new { id = Model.WorkPackage.ProcedureId }, new { })</dd>
                     @if (!String.IsNullOrEmpty(Model.WorkPackage.WorkPackageableThingURL))
                     {
                         <dt>Work Packagable Thing URL</dt>
@@ -41,9 +41,9 @@
                             <li class="block--transparent">
                                 @if (businessItem.ActualisesProcedureStep != null)
                                 {
-                                    foreach (SharepointLookupItem procedureStep in businessItem.ActualisesProcedureStep)
+                                    foreach (BusinessItemStep procedureStep in businessItem.ActualisesProcedureStep)
                                     {
-                                        <span><p>@Html.ActionLink(procedureStep.Value, "Details", "Steps", new { id = procedureStep.Id }, new { })</p></span>
+                                        <span><p>@Html.ActionLink(procedureStep.StepName, "Details", "Steps", new { id = procedureStep.StepId }, new { })</p></span>
                                     }
                                 }
                                 @if (businessItem.Date.HasValue)
@@ -54,25 +54,9 @@
                                 {
                                     <a href="@businessItem.Weblink">@businessItem.Weblink</a>
                                 }
-                                @if (businessItem.LayingBody != null)
+                                @if (string.IsNullOrWhiteSpace(businessItem.LayingBodyName)==false)
                                 {
-                                    <span><p>Laying body: @businessItem.LayingBody.Value</p></span>
-                                }
-
-                                @if (businessItem.BelongsTo.Count > 1)
-                                {
-                                    <span><p>This business item also belongs to:</p></span>
-                                    <div>
-                                        <ul class="list--details">
-                                            @foreach (SharepointLookupItem workPackage in businessItem.BelongsTo)
-                                            {
-                                                if (workPackage.Id != Model.WorkPackage.Id)
-                                                {
-                                                    <li class="block--transparent">@Html.ActionLink(workPackage.Value, "Details", "WorkPackages", new { id = workPackage.Id }, new { })</li>
-                                                }
-                                            }
-                                        </ul>
-                                    </div>
+                                    <span><p>Laying body: @businessItem.LayingBodyName</p></span>
                                 }
 
                             </li>

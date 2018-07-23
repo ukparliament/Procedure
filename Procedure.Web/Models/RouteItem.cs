@@ -1,53 +1,77 @@
-﻿using Newtonsoft.Json;
-using Parliament.Model;
+﻿using Parliament.Model;
 using System;
 
 namespace Procedure.Web.Models
 {
     public class RouteItem
     {
-        [JsonProperty(PropertyName = "ID")]
         public int Id { get; set; }
 
-        public SharepointLookupItem FromStep { get; set; }
+        public string TripleStoreId { get; set; }
 
-        [JsonProperty(PropertyName = "RouteType")]
-        public SharepointLookupItem RouteTypeItem { get; set; }
+        public int FromStepId { get; set; }
 
-        public SharepointLookupItem ToStep { get; set; }
+        public string FromStepTripleStoreId { get; set; }
 
-        [JsonIgnore]
+        public string FromStepName { get; set; }
+
+        public int ToStepId { get; set; }
+
+        public string ToStepTripleStoreId { get; set; }
+
+        public string ToStepName { get; set; }
+
+        public string RouteTypeName { get; set; }
+
         public RouteType RouteKind
         {
             get
             {
-                return (RouteType)Enum.Parse(typeof(RouteType), RouteTypeItem?.Value ?? RouteType.None.ToString());
+                return (RouteType)Enum.Parse(typeof(RouteType), RouteTypeName ?? RouteType.None.ToString());
             }
         }
-
-        public string TripleStoreId { get; set; }
-
-        [JsonProperty(PropertyName = "FromStep_x003a_TripleStoreId")]
-        public SharepointLookupItem FromStepTripleStoreIdJsonObj { get; set; }
-
-        [JsonProperty(PropertyName = "ToStep_x003a_TripleStoreId")]
-        public SharepointLookupItem ToStepTripleStoreIdJsonObj { get; set; }
-
-        public SharepointLookupItem Procedure { get; set; }
-
-
-        [JsonProperty(PropertyName = "Procedure_x003a_TripleStoreId")]
-        public SharepointLookupItem ProcedureTripleStoreIdJsonObj { get; set; }
 
         public ProcedureRoute GiveMeMappedObject()
         {
             ProcedureRoute result = new ProcedureRoute();
             result.Id = new System.Uri($"https://id.parliament.uk/{TripleStoreId}");
-            result.ProcedureRouteIsToProcedureStep = new ProcedureStep[] { ToStep.ToSharepointItem<StepItem>().GiveMeMappedObject(ToStepTripleStoreIdJsonObj.Value)};
-            result.ProcedureRouteIsFromProcedureStep = new ProcedureStep[] { FromStep.ToSharepointItem<StepItem>().GiveMeMappedObject(FromStepTripleStoreIdJsonObj.Value)};
+            result.ProcedureRouteIsToProcedureStep = new ProcedureStep[]
+            {
+                new ProcedureStep()
+                {
+                    Id=new System.Uri($"https://id.parliament.uk/{FromStepTripleStoreId}"),
+                    ProcedureStepName=FromStepName
+                }
+            };
+            result.ProcedureRouteIsFromProcedureStep = new ProcedureStep[]
+            {
+                new ProcedureStep()
+                {
+                    Id=new System.Uri($"https://id.parliament.uk/{ToStepTripleStoreId}"),
+                    ProcedureStepName=ToStepName
+                }
+            };
 
             return result;
         }
+
+        public static string ListByProcedureSql = @"select pr.Id, pr.TripleStoreId, fs.Id as FromStepId,
+	            fs.ProcedureStepName as FromStepName, fs.TripleStoreId as FromStepTripleStoreId,
+                ts.Id as ToStepId, ts.ProcedureStepName as ToStepName, ts.TripleStoreId as ToStepTripleStoreId,
+	            rt.ProcedureRouteTypeName as RouteTypeName from ProcedureRoute pr
+            join ProcedureStep fs on fs.Id=pr.FromProcedureStepId
+            join ProcedureStep ts on fs.Id=pr.ToProcedureStepId
+            join ProcedureRouteType rt on rt.Id=pr.ProcedureRouteTypeId
+            where pr.IsDeleted=0 and pr.ProcedureId=@ProcedureId";
+
+        public static string ListByStepSql = @"select pr.Id, pr.TripleStoreId, fs.Id as FromStepId,
+	            fs.ProcedureStepName as FromStepName, fs.TripleStoreId as FromStepTripleStoreId,
+                ts.Id as ToStepId, ts.ProcedureStepName as ToStepName, ts.TripleStoreId as ToStepTripleStoreId,
+	            rt.ProcedureRouteTypeName as RouteTypeName from ProcedureRoute pr
+            join ProcedureStep fs on fs.Id=pr.FromProcedureStepId
+            join ProcedureStep ts on fs.Id=pr.ToProcedureStepId
+            join ProcedureRouteType rt on rt.Id=pr.ProcedureRouteTypeId
+            where pr.IsDeleted=0 and ((pr.FromProcedureStepId=@StepId) or (pr.ToProcedureStepId=@StepId))";
 
     }
 

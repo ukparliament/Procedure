@@ -25,7 +25,7 @@ namespace Procedure.Web.Controllers
         [Route]
         public ActionResult Index()
         {
-            return ShowList<ProcedureItem>(ProcedureListId);
+            return ShowList<ProcedureItem>(ProcedureItem.ListSql);
         }
 
         [Route("{id:int}")]
@@ -33,12 +33,7 @@ namespace Procedure.Web.Controllers
         {
             ProcedureDetailViewModel viewModel = new ProcedureDetailViewModel();
 
-            string procedureResponse = null;
-            using (HttpResponseMessage responseMessage = GetSharepointItem(ProcedureListId, id))
-            {
-                procedureResponse = responseMessage.Content.ReadAsStringAsync().Result;
-            }
-            ProcedureItem procedureItem = ((JObject)JsonConvert.DeserializeObject(procedureResponse)).ToObject<ProcedureItem>();
+            ProcedureItem procedureItem = GetSqlItem<ProcedureItem>(ProcedureItem.ItemSql, new { Id = id });
 
             if (procedureItem.Id != 0)
             {
@@ -77,19 +72,19 @@ namespace Procedure.Web.Controllers
                 {
                     if (route.RouteKind == RouteType.Causes)
                     {
-                        builder.Append($"\"{route.FromStep.Value.ProcessName()}\"->\"{route.ToStep.Value.ProcessName()}\"[label=\"Causes\"]; ");
+                        builder.Append($"\"{route.FromStepName.ProcessName()}\"->\"{route.ToStepName.ProcessName()}\"[label=\"Causes\"]; ");
                     }
                     if (route.RouteKind == RouteType.Allows)
                     {
-                        builder.Append($"edge [color=red];\"{route.FromStep.Value.ProcessName()}\"->\"{route.ToStep.Value.ProcessName()}\"[label=\"Allows\"];edge[color=black];");
+                        builder.Append($"edge [color=red];\"{route.FromStepName.ProcessName()}\"->\"{route.ToStepName.ProcessName()}\"[label=\"Allows\"];edge[color=black];");
                     }
                     if (route.RouteKind == RouteType.Precludes)
                     {
-                        builder.Append($"edge [color=blue];\"{route.FromStep.Value.ProcessName()}\"->\"{route.ToStep.Value.ProcessName()}\"[label=\"Precludes\"];edge[color=black];");
+                        builder.Append($"edge [color=blue];\"{route.FromStepName.ProcessName()}\"->\"{route.ToStepName.ProcessName()}\"[label=\"Precludes\"];edge[color=black];");
                     }
                     if (route.RouteKind == RouteType.Requires)
                     {
-                        builder.Append($"edge [color=yellow];\"{route.FromStep.Value.ProcessName()}\"->\"{route.ToStep.Value.ProcessName()}\"[label=\"Requires\"];edge[color=black];");
+                        builder.Append($"edge [color=yellow];\"{route.FromStepName.ProcessName()}\"->\"{route.ToStepName.ProcessName()}\"[label=\"Requires\"];edge[color=black];");
                     }
                 }
 

@@ -13,5 +13,11 @@
 
             return result;
         }
+
+        public static string ListSql = @"select p.Id, p.ProcedureName as Title, p.TripleStoreId from [Procedure] p
+            where p.IsDeleted=0";
+
+        public static string ItemSql = @"select p.Id, p.ProcedureName as Title, p.TripleStoreId from [Procedure] p
+            where p.Id=@Id";
     }
 }

@@ -22,7 +22,7 @@
             {
             <li>
                 @Html.ActionLink(workPackage.Title, "Details", "WorkPackages", new { id = workPackage.Id }, new { }) &nbsp;
-                <label> @workPackage.SubjectTo.Value</label>
+                <label> @workPackage.ProcedureName</label>
             </li>
             }
         </ul>

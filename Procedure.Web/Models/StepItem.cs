@@ -1,4 +1,5 @@
 ﻿using Parliament.Model;
+using System.Collections.Generic;
 
 namespace Procedure.Web.Models
 {
@@ -8,7 +9,7 @@ namespace Procedure.Web.Models
 
         public string Description { get; set; }
 
-        public SharepointLookupItem[] House { get; set; }
+        public IEnumerable<ProcedureStepHouse> Houses { get; set; }
 
         public ProcedureStep GiveMeMappedObject(string tripleStoreId)
         {
@@ -20,6 +21,16 @@ namespace Procedure.Web.Models
 
             return result;
         }
+
+        public static string ListSql = @"select ps.Id, ps.TripleStoreId, ps.ProcedureStepName as Title,
+	             ps.ProcedureStepName as [Description]
+            from ProcedureStep ps
+            where ps.IsDeleted=0";
+
+        public static string ItemSql = @"select ps.Id, ps.TripleStoreId, ps.ProcedureStepName as Title,
+	             ps.ProcedureStepName as [Description]
+            from ProcedureStep ps
+            where ps.Id=@Id";
 
     }
 }

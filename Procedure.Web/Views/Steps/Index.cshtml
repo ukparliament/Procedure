@@ -22,9 +22,9 @@
             {
             <li>
                 @Html.ActionLink(step.Title, "Details", "Steps", new { id = step.Id }, new { }) &nbsp;
-                @if (step.House.Any())
+                @if (step.Houses.Any())
                 {
-                <label>@step.House.Select(h => h.Value.Substring(9)).Aggregate((i, j) =>  i + ", " + j )</label>
+                <label>@step.Houses.Select(h => h.HouseName.Substring(9)).Aggregate((i, j) =>  i + ", " + j )</label>
                 }
             </li>
             }

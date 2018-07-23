@@ -1,18 +1,14 @@
-﻿using Newtonsoft.Json;
-using Parliament.Model;
-using System;
+﻿using System;
 
 namespace Procedure.Web.Models
 {
 
     public class WorkPackageItem : BaseSharepointItem
     {
-        public SharepointLookupItem SubjectTo { get; set; }
+        public int ProcedureId { get; set; }
 
-        [JsonProperty(PropertyName = "SubjectTo_x003a_TripleStoreId")]
-        public SharepointLookupItem SubjectToTripleStoreIdJsonObj { get; set; }
+        public string ProcedureName { get; set; }
 
-        [JsonProperty(PropertyName = "OData__x0076_dy9")]
         public string TripleStoreId { get; set; }
 
         public string SIPrefix { get; set; }
@@ -23,23 +19,32 @@ namespace Procedure.Web.Models
 
         public string ComingIntoForceNote { get; set; }
 
-        public DateTime? ComingIntoForceDate { get; set; }
-
-        public SharepointLookupItem WorkPackagableThingType { get; set; }
+        public DateTimeOffset? ComingIntoForceDate { get; set; }
 
         public string WorkPackageableThingURL { get; set; }
 
-        public DateTime? ObjectionDeadline { get; set; }
+        public DateTimeOffset? ObjectionDeadline { get; set; }
 
-        // Note Title is property of WorkPackageableThing instead of WorkPackage  
-        public WorkPackage GiveMeMappedObject(string tripleStoreId)
-        {
-            string id = tripleStoreId ?? TripleStoreId;
-            WorkPackage result = new WorkPackage();
-            result.Id = new System.Uri($"https://id.parliament.uk/{id}");
-            result.WorkPackageHasProcedure = SubjectTo.ToSharepointItem<ProcedureItem>().GiveMeMappedObject(SubjectToTripleStoreIdJsonObj.Value);
+        public static string ListSql = @"select wp.Id, wp.ProcedureWorkPackageableThingName as Title,
+	            wp.TripleStoreId, wp.StatutoryInstrumentNumberPrefix as SIPrefix,
+	            wp.StatutoryInstrumentNumberYear as SIYear,
+	            wp.StatutoryInstrumentNumber as SINumber, wp.ComingIntoForceNote,
+	            wp.ComingIntoForceDate, wp.WebLink as WorkPackageableThingURL,
+	            wp.TimeLimitForObjectionEndDate as ObjectionDeadline, p.Id as ProcedureId,
+                p.ProcedureName
+            from ProcedureWorkPackageableThing wp
+            join [Procedure] p on p.Id=wp.ProcedureId
+            where wp.IsDeleted=0";
 
-            return result;
-        }
+        public static string ItemSql = @"select wp.Id, wp.ProcedureWorkPackageableThingName as Title,
+	            wp.TripleStoreId, wp.StatutoryInstrumentNumberPrefix as SIPrefix,
+	            wp.StatutoryInstrumentNumberYear as SIYear,
+	            wp.StatutoryInstrumentNumber as SINumber, wp.ComingIntoForceNote,
+	            wp.ComingIntoForceDate, wp.WebLink as WorkPackageableThingURL,
+	            wp.TimeLimitForObjectionEndDate as ObjectionDeadline, p.Id as ProcedureId,
+                p.ProcedureName
+            from ProcedureWorkPackageableThing wp
+            join [Procedure] p on p.Id=wp.ProcedureId
+            where wp.IsDeleted=0 and wp.Id=@Id";
     }
 }

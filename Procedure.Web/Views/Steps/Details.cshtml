@@ -15,11 +15,11 @@
                         <dt>Description </dt>
                         <dd>@Model.Step.Description</dd>
                     }
-                    @if (Model.Step.House.Any())
+                    @if (Model.Step.Houses.Any())
                     {
-                        foreach (SharepointLookupItem House in Model.Step.House)
+                        foreach (ProcedureStepHouse House in Model.Step.Houses)
                         {
-                            <dd>@House.Value</dd>
+                            <dd>@House.HouseName</dd>
                         }
                     }
                 </dl>
@@ -36,18 +36,18 @@
                     <ul class="list--details">
                         @foreach (RouteItem route in Model.Routes)
                         {
-                            if ((route.FromStep.Id == Model.Step.Id) && (route.ToStep.Id == Model.Step.Id))
+                            if ((route.FromStepId == Model.Step.Id) && (route.ToStepId == Model.Step.Id))
                             {
-                                <li>@route.FromStep.Value @route.RouteKind @route.ToStep.Value</li>
+                                <li>@route.FromStepName @route.RouteKind @route.ToStepName</li>
                             }
                             else
-                            if (route.FromStep.Id == Model.Step.Id)
+                            if (route.FromStepId == Model.Step.Id)
                             {
-                                <li>@route.FromStep.Value @route.RouteKind @Html.ActionLink(route.ToStep.Value, "Details", "Steps", new { id = route.ToStep.Id }, new { })</li>
+                                <li>@route.FromStepName @route.RouteKind @Html.ActionLink(route.ToStepName, "Details", "Steps", new { id = route.ToStepId }, new { })</li>
                             }
                             else
                             {
-                                <li>@Html.ActionLink(route.FromStep.Value, "Details", "Steps", new { id = route.FromStep.Id }, new { }) @route.RouteKind @route.ToStep.Value</li>
+                                <li>@Html.ActionLink(route.FromStepName, "Details", "Steps", new { id = route.FromStepId }, new { }) @route.RouteKind @route.ToStepName</li>
                             }
                         }
                     </ul>
@@ -70,21 +70,7 @@
                     {
                         <li>
                             [@businessItem.AllData()] belonging to
-                            @if (businessItem.BelongsTo.Count == 1)
-                            {
-                                @Html.ActionLink(businessItem.BelongsTo[0].Value, "Details", "WorkPackages", new { id = businessItem.BelongsTo[0].Id }, new { })
-                            }
-                            else
-                            {
-                                <div>
-                                    <ul class="list--details">
-                                        @foreach (SharepointLookupItem workPackage in businessItem.BelongsTo)
-                                        {
-                                            <li>@Html.ActionLink(workPackage.Value, "Details", "WorkPackages", new { id = workPackage.Id }, new { })</li>
-                                        }
-                                    </ul>
-                                </div>
-                            }
+                            @Html.ActionLink(businessItem.WorkPackageName, "Details", "WorkPackages", new { id = businessItem.WorkPackageId }, new { })
                         </li>
                     }
                 </ul>

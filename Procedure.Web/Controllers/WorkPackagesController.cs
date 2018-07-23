@@ -13,7 +13,7 @@ namespace Procedure.Web.Controllers
         [Route]
         public ActionResult Index()
         {
-            return ShowList<WorkPackageItem>(ProcedureWorkPackageListId);
+            return ShowList<WorkPackageItem>(WorkPackageItem.ListSql);
         }
 
         [Route("{id:int}")]
@@ -25,7 +25,7 @@ namespace Procedure.Web.Controllers
             {
                 viewModel.WorkPackage = workPackage;
                 viewModel.BusinessItems = getAllBusinessItems(id);
-                viewModel.Tree = giveMeTheTree(id, viewModel.WorkPackage.SubjectTo.Id);
+                viewModel.Tree = giveMeTheTree(id, viewModel.WorkPackage.ProcedureId);
             }
 
             return View(viewModel);
@@ -51,73 +51,73 @@ namespace Procedure.Web.Controllers
             WorkPackageItem workPackage = getWorkPackage(workPackageId);
             if (workPackage.Id != 0)
             {
-                int procedureId = workPackage.SubjectTo.Id;
+                int procedureId = workPackage.ProcedureId;
 
                 List<BusinessItem> businessItemList = getAllBusinessItems(workPackageId);
                 int[] actualizedStepIds = businessItemList
-                .SelectMany(bi => bi.ActualisesProcedureStep.Select(s => s.Id))
+                .SelectMany(bi => bi.ActualisesProcedureStep.Select(s => s.StepId))
                 .ToArray();
 
                 List<RouteItem> routes = getAllRoutes(procedureId);
 
-                List<RouteItem> routesWithActualizedFromSteps = routes.Where(route => actualizedStepIds.Contains(route.FromStep.Id)).ToList();
-                List<RouteItem> routesWithActualizedToSteps = routes.Where(route => actualizedStepIds.Contains(route.ToStep.Id)).ToList();
+                List<RouteItem> routesWithActualizedFromSteps = routes.Where(route => actualizedStepIds.Contains(route.FromStepId)).ToList();
+                List<RouteItem> routesWithActualizedToSteps = routes.Where(route => actualizedStepIds.Contains(route.ToStepId)).ToList();
 
-                List<RouteItem> nonSelfReferencedRoutesWithBothEndsActualized = routesWithActualizedFromSteps.Where(route => actualizedStepIds.Contains(route.ToStep.Id) && actualizedStepIds.Contains(route.FromStep.Id) && route.FromStep.Id != route.ToStep.Id).ToList();
+                List<RouteItem> nonSelfReferencedRoutesWithBothEndsActualized = routesWithActualizedFromSteps.Where(route => actualizedStepIds.Contains(route.ToStepId) && actualizedStepIds.Contains(route.FromStepId) && route.FromStepId != route.ToStepId).ToList();
                 List<RouteItem> precludeOrRequireRoutes = routes.Where(route => route.RouteKind == RouteType.Precludes || route.RouteKind == RouteType.Requires).ToList();
-                List<RouteItem> routesWithStepsPrecludingThemselves = routes.Where(r => r.FromStep.Id == r.ToStep.Id && r.RouteKind == RouteType.Precludes).ToList();
+                List<RouteItem> routesWithStepsPrecludingThemselves = routes.Where(r => r.FromStepId == r.ToStepId && r.RouteKind == RouteType.Precludes).ToList();
 
-                int[] allStepIds = routes.Select(r => r.FromStep.Id).Union(routes.Select(r => r.ToStep.Id)).Distinct().ToArray();
-                int[] precludeSelfStepIds = routesWithStepsPrecludingThemselves.Select(r => r.FromStep.Id).ToArray();
+                int[] allStepIds = routes.Select(r => r.FromStepId).Union(routes.Select(r => r.ToStepId)).Distinct().ToArray();
+                int[] precludeSelfStepIds = routesWithStepsPrecludingThemselves.Select(r => r.FromStepId).ToArray();
                 int[] canActualizeSelfAgainStepIds = allStepIds.Except(precludeSelfStepIds).ToArray();
 
-                int[] blackOutFromStepIds = nonSelfReferencedRoutesWithBothEndsActualized.Select(r => r.FromStep.Id).ToArray();
-                int[] blackOutToStepsIds = routesWithActualizedFromSteps.Where(r => r.RouteKind == RouteType.Precludes).Select(r => r.ToStep.Id).ToArray();
+                int[] blackOutFromStepIds = nonSelfReferencedRoutesWithBothEndsActualized.Select(r => r.FromStepId).ToArray();
+                int[] blackOutToStepsIds = routesWithActualizedFromSteps.Where(r => r.RouteKind == RouteType.Precludes).Select(r => r.ToStepId).ToArray();
 
-                IEnumerable<int> unBlackOut = routes.Except(precludeOrRequireRoutes).Except(routesWithActualizedToSteps).GroupBy(r => r.FromStep.Id).Select(group => new { fromStep = group.Key, routeCount = group.Count()}).Where(g => g.routeCount >= 1).Select(g => g.fromStep);
+                IEnumerable<int> unBlackOut = routes.Except(precludeOrRequireRoutes).Except(routesWithActualizedToSteps).GroupBy(r => r.FromStepId).Select(group => new { fromStep = group.Key, routeCount = group.Count()}).Where(g => g.routeCount >= 1).Select(g => g.fromStep);
 
                 StringBuilder builder = new StringBuilder("graph [fontname = \"calibri\"]; node[fontname = \"calibri\"]; edge[fontname = \"calibri\"];");
 
                 foreach (RouteItem route in routesWithActualizedFromSteps)
                 {
-                    if (nonSelfReferencedRoutesWithBothEndsActualized.Contains(route) || (!blackOutToStepsIds.Contains(route.ToStep.Id) && !new[] { RouteType.Precludes, RouteType.Requires }.Contains(route.RouteKind)))
+                    if (nonSelfReferencedRoutesWithBothEndsActualized.Contains(route) || (!blackOutToStepsIds.Contains(route.ToStepId) && !new[] { RouteType.Precludes, RouteType.Requires }.Contains(route.RouteKind)))
                     {
                         if (route.RouteKind == RouteType.Causes)
                         {
-                            builder.Append($"\"{route.FromStep.Value.ProcessName()}\" -> \"{route.ToStep.Value.ProcessName()}\" [label = \"Causes\"]; ");
+                            builder.Append($"\"{route.FromStepName.ProcessName()}\" -> \"{route.ToStepName.ProcessName()}\" [label = \"Causes\"]; ");
                         }
                         if (route.RouteKind == RouteType.Allows)
                         {
-                            builder.Append($"edge [color=red]; \"{route.FromStep.Value.ProcessName()}\" -> \"{route.ToStep.Value.ProcessName()}\" [label = \"Allows\"]; edge [color=black];");
+                            builder.Append($"edge [color=red]; \"{route.FromStepName.ProcessName()}\" -> \"{route.ToStepName.ProcessName()}\" [label = \"Allows\"]; edge [color=black];");
                         }
                         if (route.RouteKind == RouteType.Precludes)
                         {
-                            builder.Append($"edge [color=blue]; \"{route.FromStep.Value.ProcessName()}\" -> \"{route.ToStep.Value.ProcessName()}\" [label = \"Precludes\"]; edge [color=black];");
+                            builder.Append($"edge [color=blue]; \"{route.FromStepName.ProcessName()}\" -> \"{route.ToStepName.ProcessName()}\" [label = \"Precludes\"]; edge [color=black];");
                         }
                         if (route.RouteKind == RouteType.Requires)
                         {
-                            builder.Append($"edge [color=yellow]; \"{route.FromStep.Value.ProcessName()}\" -> \"{route.ToStep.Value.ProcessName()}\" [label = \"Requires\"]; edge [color=black];");
+                            builder.Append($"edge [color=yellow]; \"{route.FromStepName.ProcessName()}\" -> \"{route.ToStepName.ProcessName()}\" [label = \"Requires\"]; edge [color=black];");
                         }
                     }
-                    if (!blackOutFromStepIds.Except(unBlackOut).Contains(route.FromStep.Id) && !blackOutToStepsIds.Contains(route.ToStep.Id) && !new[] { RouteType.Precludes, RouteType.Requires }.Contains(route.RouteKind))
+                    if (!blackOutFromStepIds.Except(unBlackOut).Contains(route.FromStepId) && !blackOutToStepsIds.Contains(route.ToStepId) && !new[] { RouteType.Precludes, RouteType.Requires }.Contains(route.RouteKind))
                     {
-                        builder.Append($"\"{route.ToStep.Value.ProcessName()}\" [style=filled,fillcolor=white,color=orange,peripheries=2];");
+                        builder.Append($"\"{route.ToStepName.ProcessName()}\" [style=filled,fillcolor=white,color=orange,peripheries=2];");
                     }
-                    if (actualizedStepIds.Contains(route.FromStep.Id))
+                    if (actualizedStepIds.Contains(route.FromStepId))
                     {
-                        builder.Append($"\"{route.FromStep.Value.ProcessName()}\" [style=filled,color=gray];");
+                        builder.Append($"\"{route.FromStepName.ProcessName()}\" [style=filled,color=gray];");
                     }
-                    if (actualizedStepIds.Contains(route.FromStep.Id) && canActualizeSelfAgainStepIds.Contains(route.FromStep.Id))
+                    if (actualizedStepIds.Contains(route.FromStepId) && canActualizeSelfAgainStepIds.Contains(route.FromStepId))
                     {
-                        builder.Replace($"\"{route.FromStep.Value.ProcessName()}\" [style=filled,color=gray];", $"\"{route.FromStep.Value.ProcessName()}\" [style=filled,color=lemonchiffon2];");
+                        builder.Replace($"\"{route.FromStepName.ProcessName()}\" [style=filled,color=gray];", $"\"{route.FromStepName.ProcessName()}\" [style=filled,color=lemonchiffon2];");
                     }
-                    if (actualizedStepIds.Contains(route.ToStep.Id) && canActualizeSelfAgainStepIds.Contains(route.ToStep.Id))
+                    if (actualizedStepIds.Contains(route.ToStepId) && canActualizeSelfAgainStepIds.Contains(route.ToStepId))
                     {
-                        builder.Replace($"\"{route.ToStep.Value.ProcessName()}\" [style=filled,fillcolor=white,color=orange,peripheries=2];", $"\"{route.FromStep.Value.ProcessName()}\" [style=filled,color=lemonchiffon2];");
+                        builder.Replace($"\"{route.ToStepName.ProcessName()}\" [style=filled,fillcolor=white,color=orange,peripheries=2];", $"\"{route.FromStepName.ProcessName()}\" [style=filled,color=lemonchiffon2];");
                     }
                 }
 
-                builder.Append($"labelloc=\"t\"; fontsize = \"25\"; label = \"{workPackage.Title} \\n Subject to: {workPackage.SubjectTo.Value}\"");
+                builder.Append($"labelloc=\"t\"; fontsize = \"25\"; label = \"{workPackage.Title} \\n Subject to: {workPackage.ProcedureName}\"");
 
                 if (showLegend == true)
                 {
@@ -154,7 +154,7 @@ namespace Procedure.Web.Controllers
             List<BusinessItem> allBusinessItems = getAllBusinessItems(workPackageId);
 
             int[] stepsDone = allBusinessItems
-                .SelectMany(bi => bi.ActualisesProcedureStep.Select(s => s.Id))
+                .SelectMany(bi => bi.ActualisesProcedureStep.Select(s => s.StepId))
                 .ToArray();
 
             List<ProcedureRouteTree> procedureTree = GenerateProcedureTree(procedureId);
@@ -163,12 +163,12 @@ namespace Procedure.Web.Controllers
             foreach (ProcedureRouteTree procedureRouteTreeItem in procedureTree)
             {
                 List<BusinessItem> businessItems = allBusinessItems
-                    .Where(bi => bi.ActualisesProcedureStep.Any(s => s.Id == procedureRouteTreeItem.Step.Id))
+                    .Where(bi => bi.ActualisesProcedureStep.Any(s => s.StepId == procedureRouteTreeItem.Step.Id))
                     .ToList();
                 if (businessItems.Any())
                 {
                     foreach (BusinessItem businessItem in allBusinessItems.Where(bi => businessItems.Exists(b => b.Id == bi.Id)))
-                        businessItem.ActualisesProcedureStep.RemoveAll(s => s.Id == procedureRouteTreeItem.Step.Id);
+                        businessItem.ActualisesProcedureStep.RemoveAll(s => s.StepId== procedureRouteTreeItem.Step.Id);
                     allBusinessItems.RemoveAll(bi => bi.ActualisesProcedureStep.Any() == false);
                     result.Add(new WorkPackageRouteTree()
                     {
@@ -192,11 +192,11 @@ namespace Procedure.Web.Controllers
             foreach (ProcedureRouteTree procedureRouteTreeItem in procedureTree)
             {
                 List<BusinessItem> businessItems = allBusinessItems
-                    .Where(bi => bi.ActualisesProcedureStep.Any(s => s.Id == procedureRouteTreeItem.Step.Id))
+                    .Where(bi => bi.ActualisesProcedureStep.Any(s => s.StepId == procedureRouteTreeItem.Step.Id))
                     .ToList();
                 bool isPrecluded = precludedSteps.Contains(procedureRouteTreeItem.Step.Id);
                 foreach (BusinessItem businessItem in allBusinessItems.Where(bi => businessItems.Exists(b => b.Id == bi.Id)))
-                    businessItem.ActualisesProcedureStep.RemoveAll(s => s.Id == procedureRouteTreeItem.Step.Id);
+                    businessItem.ActualisesProcedureStep.RemoveAll(s => s.StepId == procedureRouteTreeItem.Step.Id);
                 allBusinessItems.RemoveAll(bi => bi.ActualisesProcedureStep.Any() == false);
                 result.Add(new WorkPackageRouteTree()
                 {
