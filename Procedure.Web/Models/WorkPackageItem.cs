@@ -26,7 +26,7 @@ namespace Procedure.Web.Models
         public DateTimeOffset? ObjectionDeadline { get; set; }
 
         public static string ListSql = @"select wp.Id, wp.ProcedureWorkPackageableThingName as Title,
-	            wp.TripleStoreId, wp.StatutoryInstrumentNumberPrefix as SIPrefix,
+	            wp.ProcedureWorkPackageTripleStoreId as TripleStoreId, wp.StatutoryInstrumentNumberPrefix as SIPrefix,
 	            wp.StatutoryInstrumentNumberYear as SIYear,
 	            wp.StatutoryInstrumentNumber as SINumber, wp.ComingIntoForceNote,
 	            wp.ComingIntoForceDate, wp.WebLink as WorkPackageableThingURL,
@@ -37,7 +37,7 @@ namespace Procedure.Web.Models
             where wp.IsDeleted=0";
 
         public static string ItemSql = @"select wp.Id, wp.ProcedureWorkPackageableThingName as Title,
-	            wp.TripleStoreId, wp.StatutoryInstrumentNumberPrefix as SIPrefix,
+	            wp.ProcedureWorkPackageTripleStoreId as TripleStoreId, wp.StatutoryInstrumentNumberPrefix as SIPrefix,
 	            wp.StatutoryInstrumentNumberYear as SIYear,
 	            wp.StatutoryInstrumentNumber as SINumber, wp.ComingIntoForceNote,
 	            wp.ComingIntoForceDate, wp.WebLink as WorkPackageableThingURL,
