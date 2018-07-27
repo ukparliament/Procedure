@@ -60,7 +60,7 @@ namespace Procedure.Web.Models
                 ts.Id as ToStepId, ts.ProcedureStepName as ToStepName, ts.TripleStoreId as ToStepTripleStoreId,
 	            rt.ProcedureRouteTypeName as RouteTypeName from ProcedureRoute pr
             join ProcedureStep fs on fs.Id=pr.FromProcedureStepId
-            join ProcedureStep ts on fs.Id=pr.ToProcedureStepId
+            join ProcedureStep ts on ts.Id=pr.ToProcedureStepId
             join ProcedureRouteType rt on rt.Id=pr.ProcedureRouteTypeId
             where pr.IsDeleted=0 and pr.ProcedureId=@ProcedureId";
 
@@ -69,7 +69,7 @@ namespace Procedure.Web.Models
                 ts.Id as ToStepId, ts.ProcedureStepName as ToStepName, ts.TripleStoreId as ToStepTripleStoreId,
 	            rt.ProcedureRouteTypeName as RouteTypeName from ProcedureRoute pr
             join ProcedureStep fs on fs.Id=pr.FromProcedureStepId
-            join ProcedureStep ts on fs.Id=pr.ToProcedureStepId
+            join ProcedureStep ts on ts.Id=pr.ToProcedureStepId
             join ProcedureRouteType rt on rt.Id=pr.ProcedureRouteTypeId
             where pr.IsDeleted=0 and ((pr.FromProcedureStepId=@StepId) or (pr.ToProcedureStepId=@StepId))";
 
