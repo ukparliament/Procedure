@@ -1,12 +1,10 @@
 ﻿using Dapper;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Procedure.Web.Models;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Net.Http;
 using System.Web.Mvc;
 
 namespace Procedure.Web.Controllers
@@ -37,6 +35,23 @@ namespace Procedure.Web.Controllers
             return result;
         }
 
+        internal Tuple<List<T>, List<K>> GetSqlList<T, K>(string sql, object parameters = null)
+        {
+            List<T> resultT = new List<T>();
+            List<K> resultK = new List<K>();
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                CommandDefinition command = new CommandDefinition(sql, parameters);
+                using (SqlMapper.GridReader grid = connection.QueryMultiple(command))
+                {
+                    resultT = grid.Read<T>().ToList();
+                    resultK = grid.Read<K>().ToList();
+                }
+            }
+            return Tuple.Create<List<T>, List<K>>(resultT, resultK);
+        }
+
         internal ActionResult ShowList<T>(string sql)
         {
             List<T> items = GetSqlList<T>(sql);
@@ -48,8 +63,7 @@ namespace Procedure.Web.Controllers
         {
             List<ProcedureRouteTree> result = new List<ProcedureRouteTree>();
 
-            List<RouteItem> routes = GetSqlList<RouteItem>(RouteItem.ListByProcedureSql, new { ProcedureId = procedureId });
-
+            List<RouteItem> routes = getAllRoutes(procedureId);
             RouteItem[] filteredRouteItems = routes.Where(to => to.FromStepId != to.ToStepId).ToArray();
             int[] entrySteps = filteredRouteItems
                 .Where(r => filteredRouteItems.Any(to => to.ToStepId == r.FromStepId) == false)
@@ -72,7 +86,7 @@ namespace Procedure.Web.Controllers
                     Step = new SharepointLookupItem()
                     {
                         Id = route.FromStepId,
-                        Value=route.FromStepName
+                        Value = route.FromStepName
                     },
                     ChildrenRoutes = giveMeChildrenRoutes(route.FromStepId, routes, ref parents)
                 });
@@ -126,9 +140,18 @@ namespace Procedure.Web.Controllers
 
         protected List<RouteItem> getAllRoutes(int procedureId)
         {
-            List<RouteItem> routes = GetSqlList<RouteItem>(RouteItem.ListByProcedureSql, new { ProcedureId = procedureId });
+            Tuple<List<RouteItem>, List<StepHouse>> routesAndSteps = GetSqlList<RouteItem, StepHouse>(RouteItem.ListByProcedureSql, new { ProcedureId = procedureId });
 
-            return routes;
+            routesAndSteps.Item1
+                .ForEach(r => {
+                    r.FromStepHouseName =
+                        string.Join(",", routesAndSteps.Item2
+                            .Where(s => s.ProcedureStepId == r.FromStepId).Select(s => s.HouseName));
+                    r.ToStepHouseName = string.Join(",", routesAndSteps.Item2
+                        .Where(s => s.ProcedureStepId == r.ToStepId).Select(s => s.HouseName));
+                });
+
+            return routesAndSteps.Item1;
         }
 
     }

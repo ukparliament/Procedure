@@ -1,4 +1,5 @@
 ﻿using Procedure.Web.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
@@ -31,7 +32,18 @@ namespace Procedure.Web.Controllers
             {
                 viewModel.Step = stepItem;
 
-                viewModel.Routes = GetSqlList<RouteItem>(RouteItem.ListByStepSql, new { StepId = id });
+                Tuple<List<RouteItem>, List<StepHouse>> routesAndSteps = GetSqlList<RouteItem, StepHouse>(RouteItem.ListByStepSql, new { StepId = id });
+
+                routesAndSteps.Item1
+                    .ForEach(r => {
+                        r.FromStepHouseName =
+                            string.Join(",", routesAndSteps.Item2
+                                .Where(s => s.ProcedureStepId == r.FromStepId).Select(s => s.HouseName));
+                        r.ToStepHouseName = string.Join(",", routesAndSteps.Item2
+                            .Where(s => s.ProcedureStepId == r.ToStepId).Select(s => s.HouseName));
+                    });
+
+                viewModel.Routes = routesAndSteps.Item1;
 
                 viewModel.BusinessItems = GetSqlList<BusinessItem>(BusinessItem.ListByStepSql, new { StepId = id });
                 List<BusinessItemStep> steps = GetSqlList<BusinessItemStep>(BusinessItemStep.ListByStepSql, new { StepId = id});

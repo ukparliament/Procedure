@@ -15,11 +15,15 @@ namespace Procedure.Web.Models
 
         public string FromStepName { get; set; }
 
+        public string FromStepHouseName { get; set; }
+
         public int ToStepId { get; set; }
 
         public string ToStepTripleStoreId { get; set; }
 
         public string ToStepName { get; set; }
+
+        public string ToStepHouseName { get; set; }
 
         public string RouteTypeName { get; set; }
 
@@ -62,7 +66,12 @@ namespace Procedure.Web.Models
             join ProcedureStep fs on fs.Id=pr.FromProcedureStepId
             join ProcedureStep ts on ts.Id=pr.ToProcedureStepId
             join ProcedureRouteType rt on rt.Id=pr.ProcedureRouteTypeId
-            where pr.IsDeleted=0 and pr.ProcedureId=@ProcedureId";
+            where pr.IsDeleted=0 and pr.ProcedureId=@ProcedureId;
+            select sh.ProcedureStepId, h.HouseName from ProcedureStepHouse sh
+			join House h on h.Id=sh.HouseId
+			join ProcedureRoute pr on sh.ProcedureStepId=pr.FromProcedureStepId or sh.ProcedureStepId=pr.ToProcedureStepId
+       		where pr.IsDeleted=0 and pr.ProcedureId=@ProcedureId
+			group by sh.ProcedureStepId, h.HouseName";
 
         public static string ListByStepSql = @"select pr.Id, pr.TripleStoreId, fs.Id as FromStepId,
 	            fs.ProcedureStepName as FromStepName, fs.TripleStoreId as FromStepTripleStoreId,
@@ -71,7 +80,12 @@ namespace Procedure.Web.Models
             join ProcedureStep fs on fs.Id=pr.FromProcedureStepId
             join ProcedureStep ts on ts.Id=pr.ToProcedureStepId
             join ProcedureRouteType rt on rt.Id=pr.ProcedureRouteTypeId
-            where pr.IsDeleted=0 and ((pr.FromProcedureStepId=@StepId) or (pr.ToProcedureStepId=@StepId))";
+            where pr.IsDeleted=0 and ((pr.FromProcedureStepId=@StepId) or (pr.ToProcedureStepId=@StepId));
+            select sh.ProcedureStepId, h.HouseName from ProcedureStepHouse sh
+			join House h on h.Id=sh.HouseId
+			join ProcedureRoute pr on sh.ProcedureStepId=pr.FromProcedureStepId or sh.ProcedureStepId=pr.ToProcedureStepId
+       		where pr.IsDeleted=0 and ((pr.FromProcedureStepId=@StepId) or (pr.ToProcedureStepId=@StepId))
+			group by sh.ProcedureStepId, h.HouseName";
 
     }
 

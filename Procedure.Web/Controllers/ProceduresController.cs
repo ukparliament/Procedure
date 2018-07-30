@@ -1,20 +1,17 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using Parliament.Model;
+using Parliament.Rdf.Serialization;
+using Procedure.Web.Extensions;
 using Procedure.Web.Models;
 using System.Collections.Generic;
-using System.Net.Http;
+using System.IO;
+using System.Linq;
 using System.Text;
 using System.Web.Mvc;
-using Parliament.Model;
-using VDS.RDF;
-using System.Xml.Linq;
-using System.Linq;
-using Parliament.Rdf.Serialization;
-using VDS.RDF.Query;
-using VDS.RDF.Parsing;
-using System.IO;
 using System.Xml;
-using Procedure.Web.Extensions;
+using System.Xml.Linq;
+using VDS.RDF;
+using VDS.RDF.Parsing;
+using VDS.RDF.Query;
 
 namespace Procedure.Web.Controllers
 {
@@ -72,19 +69,19 @@ namespace Procedure.Web.Controllers
                 {
                     if (route.RouteKind == RouteType.Causes)
                     {
-                        builder.Append($"\"{route.FromStepName.ProcessName()}\"->\"{route.ToStepName.ProcessName()}\"[label=\"Causes\"]; ");
+                        builder.Append($"\"{route.FromStepName.ProcessName()}({route.FromStepHouseName})\"->\"{route.ToStepName.ProcessName()}({route.ToStepHouseName})\"[label=\"Causes\"]; ");
                     }
                     if (route.RouteKind == RouteType.Allows)
                     {
-                        builder.Append($"edge [color=red];\"{route.FromStepName.ProcessName()}\"->\"{route.ToStepName.ProcessName()}\"[label=\"Allows\"];edge[color=black];");
+                        builder.Append($"edge [color=red];\"{route.FromStepName.ProcessName()}({route.FromStepHouseName})\"->\"{route.ToStepName.ProcessName()}({route.ToStepHouseName})\"[label=\"Allows\"];edge[color=black];");
                     }
                     if (route.RouteKind == RouteType.Precludes)
                     {
-                        builder.Append($"edge [color=blue];\"{route.FromStepName.ProcessName()}\"->\"{route.ToStepName.ProcessName()}\"[label=\"Precludes\"];edge[color=black];");
+                        builder.Append($"edge [color=blue];\"{route.FromStepName.ProcessName()}({route.FromStepHouseName})\"->\"{route.ToStepName.ProcessName()}({route.ToStepHouseName})\"[label=\"Precludes\"];edge[color=black];");
                     }
                     if (route.RouteKind == RouteType.Requires)
                     {
-                        builder.Append($"edge [color=yellow];\"{route.FromStepName.ProcessName()}\"->\"{route.ToStepName.ProcessName()}\"[label=\"Requires\"];edge[color=black];");
+                        builder.Append($"edge [color=yellow];\"{route.FromStepName.ProcessName()}({route.FromStepHouseName})\"->\"{route.ToStepName.ProcessName()}({route.ToStepHouseName})\"[label=\"Requires\"];edge[color=black];");
                     }
                 }
 
