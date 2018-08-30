@@ -24,8 +24,7 @@ namespace Procedure.Web.Models
 
         public static string ListSql = @"select ps.Id, ps.TripleStoreId, ps.ProcedureStepName as Title,
 	             ps.ProcedureStepName as [Description]
-            from ProcedureStep ps
-            where ps.IsDeleted=0";
+            from ProcedureStep ps";
 
         public static string ItemSql = @"select ps.Id, ps.TripleStoreId, ps.ProcedureStepName as Title,
 	             ps.ProcedureStepName as [Description]

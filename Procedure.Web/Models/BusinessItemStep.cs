@@ -9,14 +9,15 @@
         public static string ListByWorkPackageSql = @"select bi.Id as BusinessItemId,
                 ps.Id as StepId, ps.ProcedureStepName as StepName
             from ProcedureBusinessItem bi
-            join ProcedureWorkPackageableThing wp on wp.Id=bi.ProcedureWorkPackageId
+            join ProcedureWorkPackagedThing wp on wp.Id=bi.ProcedureWorkPackageId
             join ProcedureBusinessItemProcedureStep bips on bips.ProcedureBusinessItemId=bi.Id
             join ProcedureStep ps on ps.Id=bips.ProcedureStepId
-            where bi.IsDeleted=0 and wp.Id=@WorkPackageId";
+            where wp.Id=@WorkPackageId";
 
-        public static string ListByStepSql = @"select bips.ProcedureBusinessItemId as BusinessItemId,
+        public static string ListByStepSql = @"select bi.Id as BusinessItemId,
                 ps.Id as StepId, ps.ProcedureStepName as StepName
-            from ProcedureBusinessItemProcedureStep bips
+            from ProcedureBusinessItem bi
+            join ProcedureBusinessItemProcedureStep bips on bips.ProcedureBusinessItemId=bi.Id
             join ProcedureStep ps on ps.Id=bips.ProcedureStepId
             where bips.ProcedureStepId=@StepId";
     }

@@ -66,11 +66,11 @@ namespace Procedure.Web.Models
             join ProcedureStep fs on fs.Id=pr.FromProcedureStepId
             join ProcedureStep ts on ts.Id=pr.ToProcedureStepId
             join ProcedureRouteType rt on rt.Id=pr.ProcedureRouteTypeId
-            where pr.IsDeleted=0 and pr.ProcedureId=@ProcedureId;
+            where pr.ProcedureId=@ProcedureId;
             select sh.ProcedureStepId, h.HouseName from ProcedureStepHouse sh
 			join House h on h.Id=sh.HouseId
 			join ProcedureRoute pr on sh.ProcedureStepId=pr.FromProcedureStepId or sh.ProcedureStepId=pr.ToProcedureStepId
-       		where pr.IsDeleted=0 and pr.ProcedureId=@ProcedureId
+       		where pr.ProcedureId=@ProcedureId
 			group by sh.ProcedureStepId, h.HouseName";
 
         public static string ListByStepSql = @"select pr.Id, pr.TripleStoreId, fs.Id as FromStepId,
@@ -80,11 +80,11 @@ namespace Procedure.Web.Models
             join ProcedureStep fs on fs.Id=pr.FromProcedureStepId
             join ProcedureStep ts on ts.Id=pr.ToProcedureStepId
             join ProcedureRouteType rt on rt.Id=pr.ProcedureRouteTypeId
-            where pr.IsDeleted=0 and ((pr.FromProcedureStepId=@StepId) or (pr.ToProcedureStepId=@StepId));
+            where ((pr.FromProcedureStepId=@StepId) or (pr.ToProcedureStepId=@StepId));
             select sh.ProcedureStepId, h.HouseName from ProcedureStepHouse sh
 			join House h on h.Id=sh.HouseId
 			join ProcedureRoute pr on sh.ProcedureStepId=pr.FromProcedureStepId or sh.ProcedureStepId=pr.ToProcedureStepId
-       		where pr.IsDeleted=0 and ((pr.FromProcedureStepId=@StepId) or (pr.ToProcedureStepId=@StepId))
+       		where ((pr.FromProcedureStepId=@StepId) or (pr.ToProcedureStepId=@StepId))
 			group by sh.ProcedureStepId, h.HouseName";
 
     }

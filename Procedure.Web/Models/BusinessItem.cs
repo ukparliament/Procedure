@@ -37,23 +37,27 @@ namespace Procedure.Web.Models
         }
 
         public static string ListByWorkPackageSql = @"select bi.Id, bi.TripleStoreId, wp.Id as WorkPackageId,
-	            wp.ProcedureWorkPackageableThingName as WorkPackageName,
+	            coalesce(si.ProcedureStatutoryInstrumentName, nsi.ProcedureProposedNegativeStatutoryInstrumentName) as WorkPackageName,
                 bi.BusinessItemDate as [Date], bi.WebLink, lb.LayingBodyName
             from ProcedureBusinessItem bi
-            join ProcedureWorkPackageableThing wp on wp.Id=bi.ProcedureWorkPackageId
-            left join LayingBody lb on lb.Id=bi.LayingBodyId
-            where bi.IsDeleted=0 and wp.Id=@WorkPackageId";
+            join ProcedureWorkPackagedThing wp on wp.Id=bi.ProcedureWorkPackageId
+            left join ProcedureStatutoryInstrument si on si.Id=wp.Id
+            left join ProcedureProposedNegativeStatutoryInstrument nsi on nsi.Id=wp.Id
+            left join ProcedureLaying l on l.ProcedureBusinessItemId=bi.Id
+            left join LayingBody lb on lb.Id=l.LayingBodyId
+            where wp.Id=@WorkPackageId";
 
         public static string ListByStepSql = @"select bi.Id, bi.TripleStoreId, wp.Id as WorkPackageId,
-	            wp.ProcedureWorkPackageableThingName as WorkPackageName,
-	            ps.Id, ps.ProcedureStepName as [Value], bi.BusinessItemDate as [Date],
-	            bi.WebLink, lb.LayingBodyName
+	            coalesce(si.ProcedureStatutoryInstrumentName, nsi.ProcedureProposedNegativeStatutoryInstrumentName) as WorkPackageName,
+                bi.BusinessItemDate as [Date], bi.WebLink, lb.LayingBodyName
             from ProcedureBusinessItem bi
-            join ProcedureWorkPackageableThing wp on wp.Id=bi.ProcedureWorkPackageId
+            join ProcedureWorkPackagedThing wp on wp.Id=bi.ProcedureWorkPackageId
             join ProcedureBusinessItemProcedureStep bips on bips.ProcedureBusinessItemId=bi.Id
-            join ProcedureStep ps on ps.Id=bips.ProcedureStepId
-            left join LayingBody lb on lb.Id=bi.LayingBodyId
-            where bi.IsDeleted=0 and bips.ProcedureStepId=@StepId";
+            left join ProcedureStatutoryInstrument si on si.Id=wp.Id
+            left join ProcedureProposedNegativeStatutoryInstrument nsi on nsi.Id=wp.Id
+            left join ProcedureLaying l on l.ProcedureBusinessItemId=bi.Id
+            left join LayingBody lb on lb.Id=l.LayingBodyId
+            where bips.ProcedureStepId=@StepId";
 
     }
 }

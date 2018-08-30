@@ -23,28 +23,31 @@ namespace Procedure.Web.Models
 
         public string WorkPackageableThingURL { get; set; }
 
-        public DateTimeOffset? ObjectionDeadline { get; set; }
-
-        public static string ListSql = @"select wp.Id, wp.ProcedureWorkPackageableThingName as Title,
-	            wp.ProcedureWorkPackageTripleStoreId as TripleStoreId, wp.StatutoryInstrumentNumberPrefix as SIPrefix,
-	            wp.StatutoryInstrumentNumberYear as SIYear,
-	            wp.StatutoryInstrumentNumber as SINumber, wp.ComingIntoForceNote,
-	            wp.ComingIntoForceDate, wp.WebLink as WorkPackageableThingURL,
-	            wp.TimeLimitForObjectionEndDate as ObjectionDeadline, p.Id as ProcedureId,
+        public static string ListSql = @"select wp.Id,
+	            coalesce(si.ProcedureStatutoryInstrumentName, nsi.ProcedureProposedNegativeStatutoryInstrumentName) as Title,
+	            wp.ProcedureWorkPackageTripleStoreId as TripleStoreId, si.StatutoryInstrumentNumberPrefix as SIPrefix,
+	            si.StatutoryInstrumentNumberYear as SIYear,
+	            si.StatutoryInstrumentNumber as SINumber, si.ComingIntoForceNote,
+	            si.ComingIntoForceDate, wp.WebLink as WorkPackageableThingURL,
+	            p.Id as ProcedureId,
                 p.ProcedureName
-            from ProcedureWorkPackageableThing wp
-            join [Procedure] p on p.Id=wp.ProcedureId
-            where wp.IsDeleted=0";
+            from ProcedureWorkPackagedThing wp
+            left join ProcedureStatutoryInstrument si on si.Id=wp.Id
+            left join ProcedureProposedNegativeStatutoryInstrument nsi on nsi.Id=wp.Id
+            join [Procedure] p on p.Id=wp.ProcedureId";
 
-        public static string ItemSql = @"select wp.Id, wp.ProcedureWorkPackageableThingName as Title,
-	            wp.ProcedureWorkPackageTripleStoreId as TripleStoreId, wp.StatutoryInstrumentNumberPrefix as SIPrefix,
-	            wp.StatutoryInstrumentNumberYear as SIYear,
-	            wp.StatutoryInstrumentNumber as SINumber, wp.ComingIntoForceNote,
-	            wp.ComingIntoForceDate, wp.WebLink as WorkPackageableThingURL,
-	            wp.TimeLimitForObjectionEndDate as ObjectionDeadline, p.Id as ProcedureId,
+        public static string ItemSql = @"select wp.Id,
+	            coalesce(si.ProcedureStatutoryInstrumentName, nsi.ProcedureProposedNegativeStatutoryInstrumentName) as Title,
+	            wp.ProcedureWorkPackageTripleStoreId as TripleStoreId, si.StatutoryInstrumentNumberPrefix as SIPrefix,
+	            si.StatutoryInstrumentNumberYear as SIYear,
+	            si.StatutoryInstrumentNumber as SINumber, si.ComingIntoForceNote,
+	            si.ComingIntoForceDate, wp.WebLink as WorkPackageableThingURL,
+	            p.Id as ProcedureId,
                 p.ProcedureName
-            from ProcedureWorkPackageableThing wp
+            from ProcedureWorkPackagedThing wp
+            left join ProcedureStatutoryInstrument si on si.Id=wp.Id
+            left join ProcedureProposedNegativeStatutoryInstrument nsi on nsi.Id=wp.Id
             join [Procedure] p on p.Id=wp.ProcedureId
-            where wp.IsDeleted=0 and wp.Id=@Id";
+            where wp.Id=@Id";
     }
 }
