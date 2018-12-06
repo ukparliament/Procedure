@@ -63,14 +63,16 @@ namespace Procedure.Web.Models
 	            fs.ProcedureStepName as FromStepName, fs.TripleStoreId as FromStepTripleStoreId,
                 ts.Id as ToStepId, ts.ProcedureStepName as ToStepName, ts.TripleStoreId as ToStepTripleStoreId,
 	            rt.ProcedureRouteTypeName as RouteTypeName from ProcedureRoute pr
+            join ProcedureRouteProcedure prp on prp.ProcedureRouteId=pr.Id
             join ProcedureStep fs on fs.Id=pr.FromProcedureStepId
             join ProcedureStep ts on ts.Id=pr.ToProcedureStepId
             join ProcedureRouteType rt on rt.Id=pr.ProcedureRouteTypeId
-            where pr.ProcedureId=@ProcedureId;
+            where prp.ProcedureId=@ProcedureId;
             select sh.ProcedureStepId, h.HouseName from ProcedureStepHouse sh
 			join House h on h.Id=sh.HouseId
 			join ProcedureRoute pr on sh.ProcedureStepId=pr.FromProcedureStepId or sh.ProcedureStepId=pr.ToProcedureStepId
-       		where pr.ProcedureId=@ProcedureId
+            join ProcedureRouteProcedure prp on prp.ProcedureRouteId=pr.Id
+       		where prp.ProcedureId=@ProcedureId
 			group by sh.ProcedureStepId, h.HouseName";
 
         public static string ListByStepSql = @"select pr.Id, pr.TripleStoreId, fs.Id as FromStepId,
