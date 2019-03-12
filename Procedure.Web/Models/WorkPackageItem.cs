@@ -24,9 +24,11 @@ namespace Procedure.Web.Models
         public string WorkPackageableThingURL { get; set; }
 
         public static string ListSql = @"select wp.Id,
-	            coalesce(si.ProcedureStatutoryInstrumentName, nsi.ProcedureProposedNegativeStatutoryInstrumentName) as Title,
-	            wp.ProcedureWorkPackageTripleStoreId as TripleStoreId, si.StatutoryInstrumentNumberPrefix as SIPrefix,
+	            coalesce(si.ProcedureStatutoryInstrumentName, nsi.ProcedureProposedNegativeStatutoryInstrumentName, t.ProcedureTreatyName) as Title,
+	            wp.ProcedureWorkPackageTripleStoreId as TripleStoreId,
 	            si.StatutoryInstrumentNumberYear as SIYear,
+				coalesce(si.StatutoryInstrumentNumber, t.TreatyNumber) as SINumber,
+                coalesce(si.StatutoryInstrumentNumberPrefix, t.TreatyPrefix) as SIPrefix,
 	            si.StatutoryInstrumentNumber as SINumber, si.ComingIntoForceNote,
 	            si.ComingIntoForceDate, wp.WebLink as WorkPackageableThingURL,
 	            p.Id as ProcedureId,
@@ -34,12 +36,15 @@ namespace Procedure.Web.Models
             from ProcedureWorkPackagedThing wp
             left join ProcedureStatutoryInstrument si on si.Id=wp.Id
             left join ProcedureProposedNegativeStatutoryInstrument nsi on nsi.Id=wp.Id
+			left join ProcedureTreaty t on t.Id=wp.Id
             join [Procedure] p on p.Id=wp.ProcedureId";
 
         public static string ItemSql = @"select wp.Id,
-	            coalesce(si.ProcedureStatutoryInstrumentName, nsi.ProcedureProposedNegativeStatutoryInstrumentName) as Title,
-	            wp.ProcedureWorkPackageTripleStoreId as TripleStoreId, si.StatutoryInstrumentNumberPrefix as SIPrefix,
+	            coalesce(si.ProcedureStatutoryInstrumentName, nsi.ProcedureProposedNegativeStatutoryInstrumentName, t.ProcedureTreatyName) as Title,
+	            wp.ProcedureWorkPackageTripleStoreId as TripleStoreId,
 	            si.StatutoryInstrumentNumberYear as SIYear,
+				coalesce(si.StatutoryInstrumentNumber, t.TreatyNumber) as SINumber,
+                coalesce(si.StatutoryInstrumentNumberPrefix, t.TreatyPrefix) as SIPrefix,
 	            si.StatutoryInstrumentNumber as SINumber, si.ComingIntoForceNote,
 	            si.ComingIntoForceDate, wp.WebLink as WorkPackageableThingURL,
 	            p.Id as ProcedureId,
@@ -47,6 +52,7 @@ namespace Procedure.Web.Models
             from ProcedureWorkPackagedThing wp
             left join ProcedureStatutoryInstrument si on si.Id=wp.Id
             left join ProcedureProposedNegativeStatutoryInstrument nsi on nsi.Id=wp.Id
+			left join ProcedureTreaty t on t.Id=wp.Id
             join [Procedure] p on p.Id=wp.ProcedureId
             where wp.Id=@Id";
     }
