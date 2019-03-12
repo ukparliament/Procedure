@@ -37,24 +37,26 @@ namespace Procedure.Web.Models
         }
 
         public static string ListByWorkPackageSql = @"select bi.Id, bi.TripleStoreId, wp.Id as WorkPackageId,
-	            coalesce(si.ProcedureStatutoryInstrumentName, nsi.ProcedureProposedNegativeStatutoryInstrumentName) as WorkPackageName,
+                coalesce(si.ProcedureStatutoryInstrumentName, nsi.ProcedureProposedNegativeStatutoryInstrumentName, t.ProcedureTreatyName) as WorkPackageName,
                 bi.BusinessItemDate as [Date], bi.WebLink, lb.LayingBodyName
             from ProcedureBusinessItem bi
             join ProcedureWorkPackagedThing wp on wp.Id=bi.ProcedureWorkPackageId
             left join ProcedureStatutoryInstrument si on si.Id=wp.Id
             left join ProcedureProposedNegativeStatutoryInstrument nsi on nsi.Id=wp.Id
+            left join ProcedureTreaty t on t.Id=wp.Id
             left join ProcedureLaying l on l.ProcedureBusinessItemId=bi.Id
             left join LayingBody lb on lb.Id=l.LayingBodyId
             where wp.Id=@WorkPackageId";
 
         public static string ListByStepSql = @"select bi.Id, bi.TripleStoreId, wp.Id as WorkPackageId,
-	            coalesce(si.ProcedureStatutoryInstrumentName, nsi.ProcedureProposedNegativeStatutoryInstrumentName) as WorkPackageName,
+	            coalesce(si.ProcedureStatutoryInstrumentName, nsi.ProcedureProposedNegativeStatutoryInstrumentName, t.ProcedureTreatyName) as WorkPackageName,
                 bi.BusinessItemDate as [Date], bi.WebLink, lb.LayingBodyName
             from ProcedureBusinessItem bi
             join ProcedureWorkPackagedThing wp on wp.Id=bi.ProcedureWorkPackageId
             join ProcedureBusinessItemProcedureStep bips on bips.ProcedureBusinessItemId=bi.Id
             left join ProcedureStatutoryInstrument si on si.Id=wp.Id
             left join ProcedureProposedNegativeStatutoryInstrument nsi on nsi.Id=wp.Id
+            left join ProcedureTreaty t on t.Id=wp.Id
             left join ProcedureLaying l on l.ProcedureBusinessItemId=bi.Id
             left join LayingBody lb on lb.Id=l.LayingBodyId
             where bips.ProcedureStepId=@StepId";
